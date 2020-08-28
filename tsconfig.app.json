@@ -1,0 +1,27 @@
+{
+	"compileOnSave": true,
+	"compilerOptions": {
+		"baseUrl": "./",
+		"outDir": "dist",
+		"sourceMap": true,
+		"downlevelIteration": true,
+		"experimentalDecorators": true,
+		"moduleResolution": "node",
+		"esModuleInterop": true,
+		"removeComments": true,
+		"importHelpers": true,
+		"target": "ES5",
+		"lib": [
+			"ES2018",
+			"DOM"
+		],
+		"paths": {}
+	},
+	"include": [
+		"src/**/*.ts"
+	],
+	"exclude": [
+		"node_modules",
+		"**/*.spec.ts"
+	]
+}
