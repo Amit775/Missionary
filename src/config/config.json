@@ -1,0 +1,6 @@
+{
+	"db": {
+		"uri": "mongodb+srv://AmitBublil:AmitBublil@missionary.ms1yx.mongodb.net/missionary?retryWrites=true&w=majority",
+		"name": "missionary"
+	}
+}
