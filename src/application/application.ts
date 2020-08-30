@@ -5,7 +5,7 @@ import express, { Request, Response, NextFunction, Express } from 'express';
 import { Logger } from 'winston';
 import { urlencoded, json } from 'body-parser';
 import { log_request, log_response, log_error } from '../logger/middleware';
-import { IController } from '../api/missions';
+import { IController } from '../api/controller.interface';
 
 
 @injectable()
