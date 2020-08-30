@@ -1,11 +1,11 @@
 import { injectable } from 'inversify';
 
-export interface IMissionsDAL {
+export interface IGroupsDAL {
 	ok(): boolean;
 }
 
 @injectable()
-export class MissionsDAL implements IMissionsDAL {
+export class GroupsDAL implements IGroupsDAL {
 	public ok(): boolean {
 		return true;
 	}

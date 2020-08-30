@@ -2,11 +2,12 @@ import { INJECTOR } from '../config/types';
 import { injectable, inject } from 'inversify';
 import { Permission } from './../models/permission';
 import { ObjectId } from 'mongodb';
-import { IMissionDAL } from '../dal/missions';
+import { IMissionsDAL } from '../dal/missions';
 import { Mission } from '../models/mission';
 import { WithoutId } from '../models/without-id';
 
-export interface IMissionBL {
+export interface IMissionsBL {
+	ok(): boolean;
 	getAllMissions(): Mission[];
 	getAllMissionsNames(): Mission[];
 	getMissionById(id: ObjectId): Mission;
@@ -22,8 +23,12 @@ export interface IMissionBL {
 }
 
 @injectable()
-export class MissionsBL implements IMissionBL {
-	@inject(INJECTOR.MissionsDAL) private dal: IMissionDAL
+export class MissionsBL implements IMissionsBL {
+	@inject(INJECTOR.MissionsDAL) private dal: IMissionsDAL
+
+	public ok(): boolean {
+		return this.dal.ok();
+	}
 
 	getAllMissionsNames(): Mission[] {
 		throw new Error("Method not implemented.");
