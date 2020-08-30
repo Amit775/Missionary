@@ -11,6 +11,9 @@
 		"removeComments": true,
 		"importHelpers": true,
 		"resolveJsonModule": true,
+		"types": [
+			"reflect-metadata"
+		],
 		"target": "ES5",
 		"lib": [
 			"ES2018",
