@@ -4,68 +4,56 @@ import { Permission } from './../models/permission';
 import { ObjectId } from 'mongodb';
 import { IMissionsDAL } from '../dal/missions';
 import { Mission } from '../models/mission';
-import { WithoutId } from '../models/without-id';
 
 export interface IMissionsBL {
-	ok(): boolean;
-	getAllMissions(): Mission[];
-	getAllMissionsNames(): Mission[];
-	getMissionById(id: ObjectId): Mission;
-	getMissionsByIds(...ids: ObjectId[]): Mission[];
-	getPermissionsOfUser(userId: string, missionId: ObjectId): Permission;
-	exportMission(missionId: ObjectId): boolean;
-	askToJoinToMission(userId: string, missionId: ObjectId): void;
-	createMission(mission: WithoutId<Mission>): WithoutId<Mission>;
-	leaveMission(missionId: ObjectId, userId: string): void;
-	getAllMissionsOfUser(userId: string): Mission[];
-	updateMission(mission: Mission): Mission;
-	deleteMission(mission: Mission): Mission;
+	getAllMissions(): Promise<Mission[]>;
+	getAllMissionsNames(): Promise<string[]>;
+	getMissionById(id: ObjectId): Promise<Mission>;
+	getMissionsByIds(...ids: ObjectId[]): Promise<Mission[]>;
+	getPermissionsOfUser(userId: string, missionId: ObjectId): Promise<Permission>;
+	exportMission(missionId: ObjectId): Promise<boolean>;
+	askToJoinToMission(userId: string, missionId: ObjectId): Promise<void>;
+	createMission(mission: Mission): Promise<Mission>;
+	leaveMission(missionId: ObjectId, userId: string): Promise<void>;
+	getAllMissionsOfUser(userId: string): Promise<Mission[]>;
+	updateMission(mission: Mission): Promise<Mission>;
 }
 
 @injectable()
 export class MissionsBL implements IMissionsBL {
 	@inject(INJECTOR.MissionsDAL) private dal: IMissionsDAL
 
-	public ok(): boolean {
-		return this.dal.ok();
+	getAllMissions(): Promise<Mission[]> {
+		return this.dal.getAllMissions();
 	}
-
-	getAllMissionsNames(): Mission[] {
-		throw new Error("Method not implemented.");
+	getMissionById(id: ObjectId): Promise<Mission> {
+		return this.dal.getMissionById(id);
 	}
-	getMissionById(id: ObjectId): Mission {
-		throw new Error("Method not implemented.");
+	getMissionsByIds(...ids: ObjectId[]): Promise<Mission[]> {
+		return this.dal.getMissionsByIds(...ids);
 	}
-	getMissionsByIds(...ids: ObjectId[]): Mission[] {
-		throw new Error("Method not implemented.");
+	getPermissionsOfUser(userId: string, missionId: ObjectId): Promise<Permission> {
+		return this.dal.getPermissionsOfUser(userId, missionId);
 	}
-	getPermissionsOfUser(userId: string, missionId: ObjectId): Permission {
-		throw new Error("Method not implemented.");
+	exportMission(missionId: ObjectId): Promise<boolean> {
+		return this.dal.exportMission(missionId);
 	}
-	exportMission(missionId: ObjectId): boolean {
-		throw new Error("Method not implemented.");
+	askToJoinToMission(userId: string, missionId: ObjectId): Promise<void> {
+		return this.dal.askToJoinToMission(userId, missionId);
 	}
-	askToJoinToMission(userId: string, missionId: ObjectId): void {
-		throw new Error("Method not implemented.");
+	createMission(mission: Mission): Promise<Mission> {
+		return this.dal.createMission(mission);
 	}
-	leaveMission(missionId: ObjectId, userId: string): void {
-		throw new Error("Method not implemented.");
+	leaveMission(missionId: ObjectId, userId: string): Promise<void> {
+		return this.dal.leaveMission(missionId, userId);
 	}
-	getAllMissionsOfUser(userId: string): Mission[] {
-		throw new Error("Method not implemented.");
+	getAllMissionsOfUser(userId: string): Promise<Mission[]> {
+		return this.dal.getAllMissionsOfUser(userId);
 	}
-	updateMission(mission: Mission): Mission {
-		throw new Error("Method not implemented.");
+	updateMission(mission: Mission): Promise<Mission> {
+		return this.dal.updateMission(mission);
 	}
-	deleteMission(mission: Mission): Mission {
-		throw new Error("Method not implemented.");
+	async getAllMissionsNames(): Promise<string[]> {
+		return await this.dal.getAllMissionsNames();
 	}
-
-	getAllMissions() {
-		return [];
-	}
-	createMission(mission: WithoutId<Mission>): WithoutId<Mission> {
-		return mission;
-	}
-
 }

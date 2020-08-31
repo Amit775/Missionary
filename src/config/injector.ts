@@ -15,6 +15,7 @@ import config from './config.json';
 import { Application } from '../application/application';
 import { UsersDAL, IUsersDAL } from '../dal/users';
 import { GroupsController } from '../api/groups';
+import { BaseDAL } from 'src/dal/base';
 
 export type IConfig = typeof config;
 

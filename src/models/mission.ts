@@ -3,7 +3,7 @@ import { ObjectId } from 'mongodb';
 import { State } from './state';
 
 export interface Mission {
-	Id: ObjectId;
+	_id: ObjectId;
 	Name: string;
 	Description: string;
 	Users: UserWithPermission[];
