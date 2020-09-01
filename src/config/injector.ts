@@ -1,11 +1,11 @@
+import { logger } from '../logger/logger';
 import { IGroupsDAL, GroupsDAL } from '../dal/groups';
 import { IGroupsBL, GroupsBL } from '../bl/groups';
 import { UsersBL, IUsersBL } from '../bl/users';
 import { UsersController } from '../api/users';
 import { INJECTOR } from './types';
-import { Container, interfaces } from 'inversify'
+import { Container } from 'inversify'
 import { Logger } from 'winston';
-import { loggerFactory } from '../logger/logger';
 import { MonitorController } from '../api/monitor';
 import { MissionsController } from '../api/missions';
 import { MissionsBL, IMissionsBL } from '../bl/missions';
@@ -15,7 +15,6 @@ import config from './config.json';
 import { Application } from '../application/application';
 import { UsersDAL, IUsersDAL } from '../dal/users';
 import { GroupsController } from '../api/groups';
-import { BaseDAL } from 'src/dal/base';
 
 export type IConfig = typeof config;
 
@@ -34,8 +33,7 @@ Injector.bind<IController>(INJECTOR.Controllers).to(MissionsController).inSingle
 
 Injector.bind<IController>(INJECTOR.Controllers).to(MonitorController).inSingletonScope();
 
-Injector.bind<Logger>(INJECTOR.Logger).toFactory((_context: interfaces.Context) => () => loggerFactory());
-
+Injector.bind<Logger>(INJECTOR.Logger).toConstantValue(logger);
 Injector.bind<IConfig>(INJECTOR.Config).toConstantValue(config);
 
 Injector.bind<Application>(INJECTOR.Application).to(Application).inSingletonScope();

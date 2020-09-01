@@ -1,25 +1,27 @@
-import { Mission } from '../models/mission';
-import { injectable, inject } from 'inversify';
-import { BaseDAL } from './base';
+import { Observable, from, of } from 'rxjs';
+import { map, switchMap, switchMapTo } from 'rxjs/operators';
 import { ObjectId } from 'mongodb';
 import { Logger } from 'winston';
-import { Permission } from '../models/permission';
+import { injectable, inject } from 'inversify';
+
 import { INJECTOR } from '../config/types';
 import { IConfig } from '../config/injector';
+import { Mission } from '../models/mission';
+import { BaseDAL } from './base';
+import { Permission } from '../models/permission';
 
 export interface IMissionsDAL {
-	getAllMissionsNames(): Promise<string[]>;
-	getAllMissions(): Promise<Mission[]>;
-	getAllMissionsNames(): Promise<string[]>;
-	getMissionById(id: ObjectId): Promise<Mission>;
-	getMissionsByIds(...ids: ObjectId[]): Promise<Mission[]>;
-	getPermissionsOfUser(userId: string, missionId: ObjectId): Promise<Permission>;
-	exportMission(missionId: ObjectId): Promise<boolean>;
-	askToJoinToMission(userId: string, missionId: ObjectId): Promise<void>;
-	createMission(mission: Mission): Promise<Mission>;
-	leaveMission(missionId: ObjectId, userId: string): Promise<void>;
-	getAllMissionsOfUser(userId: string): Promise<Mission[]>;
-	updateMission(mission: Mission): Promise<Mission>;
+	getAllMissions(): Observable<Mission[]>;
+	getAllMissionsNames(): Observable<string[]>;
+	getMissionById(id: ObjectId): Observable<Mission>;
+	getMissionsByIds(...ids: ObjectId[]): Observable<Mission[]>;
+	getPermissionsOfUser(userId: string, missionId: ObjectId): Observable<Permission>;
+	exportMission(missionId: ObjectId): Observable<boolean>;
+	askToJoinToMission(userId: string, missionId: ObjectId): Observable<void>;
+	createMission(mission: Mission): Observable<Mission>;
+	leaveMission(userId: string, missionId: ObjectId): Observable<void>;
+	getAllMissionsOfUser(userId: string): Observable<Mission[]>;
+	updateMission(mission: Mission): Observable<Mission>;
 }
 
 @injectable()
@@ -28,44 +30,54 @@ export class MissionsDAL extends BaseDAL<Mission> implements IMissionsDAL {
 		@inject(INJECTOR.Config) config: IConfig,
 		@inject(INJECTOR.Logger) logger: Logger,
 	) { super(config, logger, 'missions'); }
-	getAllMissions(): Promise<Mission[]> {
+
+	getAllMissions(): Observable<Mission[]> {
 		return this.getAll();
 	}
-	getMissionById(id: ObjectId): Promise<Mission> {
+
+	getMissionById(id: ObjectId): Observable<Mission> {
 		return this.getById(id);
 	}
-	getMissionsByIds(...ids: ObjectId[]): Promise<Mission[]> {
-		return this.collection.find<Mission>({ _id: { $in: ids } }).toArray();
-	}
-	async getPermissionsOfUser(userId: string, missionId: ObjectId): Promise<Permission> {
-		const mission = await this.getMissionById(missionId);
-		return mission.Users.find(user => user.Id === userId).Permission;
-	}
-	async exportMission(missionId: ObjectId): Promise<boolean> {
-		const { ok } = await this.collection.findOneAndUpdate({ _id: missionId }, { $set: { IsExported: true } });
-		return ok === 1;
-	}
-	async askToJoinToMission(userId: string, missionId: ObjectId): Promise<void> {
-		this.collection.findOneAndUpdate({ _id: missionId }, { $push: { JoinRequests: userId } });
-	}
-	createMission(mission: Mission): Promise<Mission> {
-		return this.insertOne(mission);
-	}
-	async leaveMission(missionId: ObjectId, userId: string): Promise<void> {
-		this.collection.findOneAndUpdate({ _id: missionId }, { $pull: { Users: { Id: userId } } });
-	}
-	getAllMissionsOfUser(userId: string): Promise<Mission[]> {
-		return this.collection.find<Mission>({ Users: { $all: [{ "$elemMatch": { Id: userId } }] } }).toArray();
-	}
-	async updateMission(mission: Mission): Promise<Mission> {
-		const { value } = await this.collection.findOneAndReplace({ _id: mission._id }, mission, { returnOriginal: false });
-		return value;
-	}
-	async getAllMissionsNames(): Promise<string[]> {
-		return await this.collection.find<string>({}, { projection: { _id: false, Name: true } }).toArray();
+
+	getMissionsByIds(...ids: ObjectId[]): Observable<Mission[]> {
+		return this.find$({ _id: { $in: ids } }).pipe(switchMap(cursor => from(cursor.toArray())));
 	}
 
-	public ok(): boolean {
-		return true;
+	getPermissionsOfUser(userId: string, missionId: ObjectId): Observable<Permission> {
+		return this.getMissionById(missionId).pipe(
+			map(mission => mission.Users.find(user => user.Id === userId).Permission)
+		);
+	}
+
+	exportMission(missionId: ObjectId): Observable<boolean> {
+		return this.findOneAndUpdate$({ _id: missionId }, { $set: { IsExported: true } }).pipe(
+			map(({ ok }) => ok === 1));
+	}
+
+	askToJoinToMission(userId: string, missionId: ObjectId): Observable<void> {
+		return this.findOneAndUpdate$({ _id: missionId }, { $push: { JoinRequests: userId } }).pipe(switchMapTo(of(null)));
+	}
+
+	createMission(mission: Mission): Observable<Mission> {
+		return this.insertOne(mission);
+	}
+
+	leaveMission(userId: string, missionId: ObjectId): Observable<void> {
+		return this.findOneAndUpdate$({ _id: missionId }, { $pull: { Users: { Id: userId } } }).pipe(switchMapTo(of(null)));
+	}
+
+	getAllMissionsOfUser(userId: string): Observable<Mission[]> {
+		return this.find$({ Users: { $all: [{ "$elemMatch": { Id: userId } }] } }).pipe(switchMap(cursor => from(cursor.toArray())));
+	}
+
+	updateMission(mission: Mission): Observable<Mission> {
+		return this.findOneAndReplace$({ _id: mission._id }, mission).pipe(map(result => result.value));
+	}
+
+	getAllMissionsNames(): Observable<string[]> {
+		return this.find$({}, { projection: { _id: false, Name: true } }).pipe(
+			switchMap(cursor => from(cursor.toArray())),
+			map((missions: Mission[]) => missions.map((mission: Mission) => mission.Name))
+		);
 	}
 }

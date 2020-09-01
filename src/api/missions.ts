@@ -1,12 +1,14 @@
-import { Mission } from '../models/mission';
-import { INJECTOR } from '../config/types';
-import { inject, injectable } from 'inversify';
+import { Permission } from './../models/permission';
+import { Mission } from './../models/mission';
+import { take } from 'rxjs/operators';
 import express, { Router, Request, Response, NextFunction } from 'express';
+import { inject, injectable } from 'inversify';
+
+import { INJECTOR } from '../config/types';
 import { IMissionsBL } from '../bl/missions';
 import { IController } from './controller.interface';
 import { ObjectId } from 'mongodb';
-import { Permission } from '../models/permission';
-import { State } from '../models/state';
+import { parse } from 'querystring';
 
 @injectable()
 export class MissionsController implements IController {
@@ -18,22 +20,88 @@ export class MissionsController implements IController {
 	private readonly _router: Router;
 
 	constructor() {
-		this._router = express.Router()
-		this._router.get('/', (req, res) => res.send('true'));
-		this._router.post('/insertMission'), (req: Request, res: Response, next: NextFunction) => {
-			const mission: Mission = { _id: new ObjectId(351), CreatedTime: new Date(), UpdatedTime: new Date(), Creator: { Hierarchy: 'Amitbublil', Name: 'Amit Bublil', Id: 'AAA' }, Name: 'Some mission', IsExported: false, Description: 'bllaa', JoinRequests: [], Users: [{ Hierarchy: 'Amitbublil', Name: 'Amit Bublil', Id: 'AAA', Permission: Permission.ADMIN }], Type: 'Type', State: State.CREATED, Sequence: 0 };
-			res.send(
-				this.bl.createMission(mission).catch(error => next(error))
-			)
-		}
-		this._router.get('/askToJoinToMission', (req, res, next) => {
-			const { userId, missionId } = { userId: 'userId', missionId: new ObjectId("0000015f623cbc21144c527d") };
-			res.send(
-				this.bl.askToJoinToMission(userId, missionId)
-					.catch(error => next(error))
-			);
+		this._router = express.Router();
+
+		this._router.get('/getAllMissions', (req: Request, res: Response, next: NextFunction) => {
+			this.bl.getAllMissions().pipe(take(1)).subscribe({
+				next: result => res.send(result), error: error => next(error)
+			});
 		});
 
+		this._router.get('/getAllMissionsNames', (req: Request, res: Response, next: NextFunction) => {
+			this.bl.getAllMissionsNames().pipe(take(1)).subscribe({
+				next: result => res.send(result), error: error => next(error)
+			});
+		});
 
-	}
+		this._router.post('/getMissionById', (req: Request, res: Response, next: NextFunction) => {
+			const { id } = req.body;
+			const _id: ObjectId = id instanceof ObjectId ? id : new ObjectId(id);
+			this.bl.getMissionById(_id).pipe(take(1)).subscribe({
+				next: result => res.send(result), error: error => next(error)
+			});
+		});
+
+		this._router.post('/getMissionsByIds', (req: Request, res: Response, next: NextFunction) => {
+			const { ids } = req.body;
+			const _ids: ObjectId[] = ids.map((id: string | ObjectId) => id instanceof ObjectId ? id : new ObjectId(id));
+			this.bl.getMissionsByIds(..._ids).pipe(take(1)).subscribe({
+				next: result => res.send(result), error: error => next(error)
+			});
+		});
+
+		this._router.post('/getPermissionsOfUser', (req: Request, res: Response, next: NextFunction) => {
+			const { userId, missionId } = req.body;
+			const _missionId = missionId instanceof ObjectId ? missionId : new ObjectId(missionId);
+			this.bl.getPermissionsOfUser(userId, _missionId).pipe(take(1)).subscribe({
+				next: result => res.send(`${result}`), error: error => next(error)
+			});
+		});
+
+		this._router.put('/exportMission', (req: Request, res: Response, next: NextFunction) => {
+			const { missionId } = req.body;
+			const _missionId = missionId instanceof ObjectId ? missionId : new ObjectId(missionId);
+			this.bl.exportMission(_missionId).pipe(take(1)).subscribe({
+				next: result => res.send(result), error: error => next(error)
+			});
+		});
+
+		this._router.put('/askToJoinToMission', (req: Request, res: Response, next: NextFunction) => {
+			const { userId, missionId } = req.body;
+			const _missionId = missionId instanceof ObjectId ? missionId : new ObjectId(missionId);
+			this.bl.askToJoinToMission(userId, _missionId).pipe(take(1)).subscribe({
+				next: result => res.send(result), error: error => next(error)
+			});
+		});
+
+		this._router.post('/createMission', (req: Request, res: Response, next: NextFunction) => {
+			const mission: Mission = req.body;
+			this.bl.createMission(mission).pipe(take(1)).subscribe({
+				next: result => res.send(result), error: error => next(error)
+			});
+		});
+
+		this._router.put('/leaveMission', (req: Request, res: Response, next: NextFunction) => {
+			const { userId, missionId } = req.body;
+			const _missionId = missionId instanceof ObjectId ? missionId : new ObjectId(missionId);
+			this.bl.leaveMission(userId, _missionId).pipe(take(1)).subscribe({
+				next: result => res.send(result), error: error => next(error)
+			});
+		});
+
+		this._router.post('/getAllMissionsOfUser', (req: Request, res: Response, next: NextFunction) => {
+			const { userId } = req.body;
+			this.bl.getAllMissionsOfUser(userId).pipe(take(1)).subscribe({
+				next: result => res.send(result), error: error => next(error)
+			});
+		});
+
+		this._router.put('/updateMission', (req: Request, res: Response, next: NextFunction) => {
+			const mission: Mission = req.body;
+			mission._id = mission._id instanceof ObjectId ? mission._id : new ObjectId(mission._id);
+			this.bl.updateMission(mission).pipe(take(1)).subscribe({
+				next: result => res.send(result), error: error => next(error)
+			});
+		});
+	};
 }

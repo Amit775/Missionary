@@ -1,5 +1,5 @@
-import { User, UserWithPermission } from './user';
 import { ObjectId } from 'mongodb';
+import { User, UserWithPermission } from './user';
 import { State } from './state';
 
 export interface Mission {
