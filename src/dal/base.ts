@@ -1,9 +1,10 @@
-import { Observable, bindNodeCallback, from } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
-import { MongoClient, MongoError, Collection, OptionalId, InsertOneWriteOpResult, WithId, InsertWriteOpResult, FilterQuery, FindOneOptions, Cursor, UpdateQuery, FindOneAndUpdateOption, FindAndModifyWriteOpResultObject, FindOneAndReplaceOption, CollectionInsertOneOptions, CollectionInsertManyOptions } from 'mongodb';
+import { Observable, bindNodeCallback } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
+import { MongoClient, MongoError, Collection, OptionalId, InsertOneWriteOpResult, WithId, InsertWriteOpResult, FilterQuery, FindOneOptions, Cursor, UpdateQuery, FindOneAndUpdateOption, FindAndModifyWriteOpResultObject, FindOneAndReplaceOption, CollectionInsertOneOptions, CollectionInsertManyOptions, ChangeEvent } from 'mongodb';
 import { unmanaged, injectable } from 'inversify';
-import { IConfig } from '../config/injector';
 import { Logger } from 'winston';
+
+import { IConfig } from '../config/injector';
 
 @injectable()
 export abstract class BaseDAL<T extends { _id?: any }> {
@@ -36,9 +37,11 @@ export abstract class BaseDAL<T extends { _id?: any }> {
 		return bindNodeCallback<OptionalId<T>[], InsertWriteOpResult<WithId<T>>>(this.collection.insertMany);
 	}
 
-	get find$(): (query: FilterQuery<T>, options?: FindOneOptions<T>) => Observable<Cursor<T>> {
+	get find$(): (query: FilterQuery<T>, options?: FindOneOptions<T>) => Observable<T[]> {
 		this.collection.find = this.collection.find.bind(this.collection);
-		return bindNodeCallback<FilterQuery<T>, Cursor<T>>(this.collection.find);
+		return (query: FilterQuery<T>, options?: FindOneOptions<T>) =>
+			bindNodeCallback<FilterQuery<T>, FindOneOptions<T>, Cursor<T>>(this.collection.find)
+				.call(query, options).pipe(switchMap((cursor: Cursor<T>) => cursor.toArray()));
 	}
 
 	get findOne$(): (query: FilterQuery<T>, options?: FindOneOptions<T>) => Observable<T> {
@@ -54,31 +57,5 @@ export abstract class BaseDAL<T extends { _id?: any }> {
 	get findOneAndReplace$(): (filter: FilterQuery<T>, replacement: object, options?: FindOneAndReplaceOption<T>) => Observable<FindAndModifyWriteOpResultObject<T>> {
 		this.collection.findOneAndReplace = this.collection.findOneAndReplace.bind(this.collection);
 		return bindNodeCallback<FilterQuery<T>, FindAndModifyWriteOpResultObject<T>>(this.collection.findOneAndReplace);
-	}
-
-	insertOne(document: OptionalId<T>): Observable<T> {
-		return this.insertOne$(document).pipe(
-			map(({ insertedId }) => { return { ...document, _id: insertedId } as T })
-		);
-	}
-
-	insertMany(documents: OptionalId<T>[]): Observable<T[]> {
-		return this.insertMany$(documents).pipe(
-			map(({ insertedIds }) => [...documents.map((document: OptionalId<T>, index: number) => {
-				return { ...document, _id: insertedIds[index] } as T
-			})])
-		);
-	}
-
-	getAll(): Observable<T[]> {
-		return this.find$({}).pipe(switchMap(cursor => from(cursor.toArray())));
-	}
-
-	getById(id: any): Observable<T> {
-		return this.findOne$({ _id: id });
-	}
-
-	update(document: T): Observable<T> {
-		return this.findOneAndUpdate$({ _id: document._id }, { ...document, ...document }).pipe(map(x => x.value));
 	}
 }
