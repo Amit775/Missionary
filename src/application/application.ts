@@ -1,5 +1,4 @@
 import { INJECTOR } from '../config/types';
-import { IConfig } from '../config/injector';
 import { multiInject, inject, injectable } from 'inversify';
 import express, { Request, Response, NextFunction, Express } from 'express';
 import { Logger } from 'winston';
