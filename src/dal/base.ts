@@ -1,4 +1,4 @@
-import { Observable, bindNodeCallback } from 'rxjs';
+import { Observable, bindNodeCallback, fromEvent } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { MongoClient, MongoError, Collection, OptionalId, InsertOneWriteOpResult, WithId, InsertWriteOpResult, FilterQuery, FindOneOptions, Cursor, UpdateQuery, FindOneAndUpdateOption, FindAndModifyWriteOpResultObject, FindOneAndReplaceOption, CollectionInsertOneOptions, CollectionInsertManyOptions, ChangeEvent } from 'mongodb';
 import { unmanaged, injectable } from 'inversify';
@@ -10,6 +10,7 @@ import { IConfig } from '../config/injector';
 export abstract class BaseDAL<T extends { _id?: any }> {
 
 	private collection: Collection<T>;
+	private changes$: Observable<any>;
 
 	constructor(
 		@unmanaged() private config: IConfig,
@@ -24,6 +25,11 @@ export abstract class BaseDAL<T extends { _id?: any }> {
 				};
 				this.collection = client.db(this.config.db.name).collection(name);
 				this.logger.log('info', 'db connected successfully to collection ' + name);
+				this.changes$ = fromEvent(this.collection.watch(), 'change');
+				this.changes$.subscribe((doc: ChangeEvent<T>) => this.logger.log('info', doc.operationType,
+					(doc.operationType === 'update' && doc.updateDescription) ||
+					(doc.operationType === 'insert' && doc.fullDocument) ||
+					(doc.operationType === 'replace' && doc.fullDocument)));
 			});
 	}
 
