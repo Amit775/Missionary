@@ -1,8 +1,8 @@
 import { Permission } from './permission';
 export interface User {
-	Id: string;
-	Name: string;
-	Hierarchy: string;
+	_id: string;
+	name: string;
+	hierarchy: string;
 }
 
-export type UserWithPermission = User & { Permission: Permission };
+export type UserWithPermission = User & { permission: Permission };

@@ -1,5 +1,5 @@
-import { Observable, from, of } from 'rxjs';
-import { map, switchMap, switchMapTo } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { map, switchMapTo } from 'rxjs/operators';
 import { ObjectId } from 'mongodb';
 import { Logger } from 'winston';
 import { injectable, inject } from 'inversify';
@@ -45,16 +45,16 @@ export class MissionsDAL extends BaseDAL<Mission> implements IMissionsDAL {
 
 	getPermissionsOfUser(userId: string, missionId: ObjectId): Observable<Permission> {
 		return this.getMissionById(missionId)
-			.pipe(map(mission => mission.Users.find(user => user.Id === userId).Permission));
+			.pipe(map(mission => mission.users.find(user => user._id === userId).permission));
 	}
 
 	exportMission(missionId: ObjectId): Observable<boolean> {
-		return this.findOneAndUpdate$({ _id: missionId }, { $set: { IsExported: true } })
+		return this.findOneAndUpdate$({ _id: missionId }, { $set: { isExported: true } })
 			.pipe(map(({ ok }) => ok === 1));
 	}
 
 	askToJoinToMission(userId: string, missionId: ObjectId): Observable<void> {
-		return this.findOneAndUpdate$({ _id: missionId }, { $push: { JoinRequests: userId } })
+		return this.findOneAndUpdate$({ _id: missionId }, { $push: { joinRequests: userId } })
 			.pipe(switchMapTo(of(null)));
 	}
 
@@ -64,12 +64,12 @@ export class MissionsDAL extends BaseDAL<Mission> implements IMissionsDAL {
 	}
 
 	leaveMission(userId: string, missionId: ObjectId): Observable<void> {
-		return this.findOneAndUpdate$({ _id: missionId }, { $pull: { Users: { Id: userId } } })
+		return this.findOneAndUpdate$({ _id: missionId }, { $pull: { users: { _id: userId } } })
 			.pipe(switchMapTo(of()));
 	}
 
 	getAllMissionsOfUser(userId: string): Observable<Mission[]> {
-		return this.find$({ Users: { $all: [{ "$elemMatch": { Id: userId } }] } });
+		return this.find$({ users: { $all: [{ "$elemMatch": { _id: userId } }] } });
 	}
 
 	updateMission(mission: Mission): Observable<Mission> {
@@ -78,7 +78,7 @@ export class MissionsDAL extends BaseDAL<Mission> implements IMissionsDAL {
 	}
 
 	getAllMissionsNames(): Observable<string[]> {
-		return this.find$({}, { projection: { _id: false, Name: true } })
-			.pipe(map((missions: Mission[]) => missions.map((mission: Mission) => mission.Name)));
+		return this.find$({}, { projection: { _id: false, name: true } })
+			.pipe(map((missions: Mission[]) => missions.map((mission: Mission) => mission.name)));
 	}
 }
