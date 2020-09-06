@@ -1,6 +1,8 @@
-import { IGroupsDAL } from './../dal/groups';
 import { injectable, inject } from 'inversify';
+
+import { IGroupsDAL } from './../dal/groups';
 import { INJECTOR } from '../config/types';
+
 
 export interface IGroupsBL {
 	ok(): boolean;

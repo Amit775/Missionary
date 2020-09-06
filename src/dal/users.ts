@@ -1,8 +1,11 @@
 import { injectable } from 'inversify';
-import { User } from 'src/models/user';
+
+import { User } from '../models/user';
 import { BaseDAL } from './base';
 
+
 export interface IUsersDAL {
+	ok(): boolean;
 }
 
 @injectable()

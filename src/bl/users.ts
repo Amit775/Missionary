@@ -1,6 +1,8 @@
+import { injectable, inject } from 'inversify';
+
 import { IUsersDAL } from '../dal/users';
-import { injectable, inject } from "inversify";
 import { INJECTOR } from '../config/types';
+
 
 export interface IUsersBL {
 	ok(): boolean;

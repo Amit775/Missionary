@@ -1,4 +1,5 @@
 export const INJECTOR: { [key: string]: symbol } = {
+	Application: Symbol('Application'),
 	UsersBL: Symbol('IUsersBL'),
 	UsersDAL: Symbol('IUsersDAL'),
 	GroupsBL: Symbol('IGroupsBL'),
@@ -8,5 +9,4 @@ export const INJECTOR: { [key: string]: symbol } = {
 	Controllers: Symbol('IController'),
 	Logger: Symbol('Logger'),
 	Config: Symbol('IConfig'),
-	Application: Symbol('Application')
 }

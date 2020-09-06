@@ -31,12 +31,10 @@ export abstract class BaseDAL<T extends { _id?: any }> {
 					console.log(error.message);
 					return;
 				};
+
 				this.collection = client.db(this.config.db.name).collection(name);
 				this.logger.log('info', 'db connected successfully to collection ' + name);
 			});
-	}
-
-	x() {
 	}
 
 	get aggregate$(): (pipeline?: object[], options?: CollectionAggregationOptions) => Observable<AggregationCursor<T>> {

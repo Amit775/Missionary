@@ -10,6 +10,7 @@ import { Mission } from '../models/mission';
 import { BaseDAL } from './base';
 import { Permission } from '../models/permission';
 
+
 export interface IMissionsDAL {
 	getAllMissions(): Observable<Mission[]>;
 	getAllMissionsNames(): Observable<string[]>;
@@ -69,7 +70,7 @@ export class MissionsDAL extends BaseDAL<Mission> implements IMissionsDAL {
 	}
 
 	getAllMissionsOfUser(userId: string): Observable<Mission[]> {
-		return this.find$({ users: { $all: [{ "$elemMatch": { _id: userId } }] } });
+		return this.find$({ users: { $all: [{ '$elemMatch': { _id: userId } }] } });
 	}
 
 	updateMission(mission: Mission): Observable<Mission> {

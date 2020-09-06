@@ -1,5 +1,6 @@
 import { MongoDB } from 'winston-mongodb';
 import { createLogger, format, transports } from 'winston';
+
 import config from '../config/config.json';
 
 const { combine, json, splat, simple, metadata } = format;

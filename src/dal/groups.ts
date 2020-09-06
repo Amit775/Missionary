@@ -1,5 +1,6 @@
 import { injectable } from 'inversify';
 
+
 export interface IGroupsDAL {
 	ok(): boolean;
 }
