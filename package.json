@@ -8,11 +8,12 @@
 	"license": "MIT",
 	"scripts": {
 		"serve": "yarn start --watch",
-		"start": "yarn build && node dist/index.js --unhandled-rejections=strict",
+		"start": "yarn build && node dist/index.js",
 		"build": "yarn clean && tsc --build",
 		"clean": "rimraf ./dist"
 	},
 	"devDependencies": {
+		"@types/cors": "^2.8.7",
 		"@types/express": "^4.17.7",
 		"@types/mongodb": "^3.5.26",
 		"@types/node": "^14.0.27",
@@ -22,6 +23,7 @@
 	},
 	"dependencies": {
 		"body-parser": "^1.19.0",
+		"cors": "^2.8.5",
 		"express": "^4.17.1",
 		"inversify": "^5.0.1",
 		"mongodb": "^3.6.0",

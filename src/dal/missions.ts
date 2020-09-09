@@ -15,7 +15,7 @@ export interface IMissionsDAL {
 	getAllMissions(): Observable<Mission[]>;
 	getAllMissionsNames(): Observable<string[]>;
 	getMissionById(id: ObjectId): Observable<Mission>;
-	getMissionsByIds(...ids: ObjectId[]): Observable<Mission[]>;
+	getMissionsByIds(ids: ObjectId[]): Observable<Mission[]>;
 	getPermissionsOfUser(userId: string, missionId: ObjectId): Observable<Permission>;
 	exportMission(missionId: ObjectId): Observable<boolean>;
 	askToJoinToMission(userId: string, missionId: ObjectId): Observable<void>;
@@ -40,7 +40,7 @@ export class MissionsDAL extends BaseDAL<Mission> implements IMissionsDAL {
 		return this.findOne$({ _id: id });
 	}
 
-	getMissionsByIds(...ids: ObjectId[]): Observable<Mission[]> {
+	getMissionsByIds(ids: ObjectId[]): Observable<Mission[]> {
 		return this.find$({ _id: { $in: ids } });
 	}
 
@@ -55,7 +55,7 @@ export class MissionsDAL extends BaseDAL<Mission> implements IMissionsDAL {
 	}
 
 	askToJoinToMission(userId: string, missionId: ObjectId): Observable<void> {
-		return this.findOneAndUpdate$({ _id: missionId }, { $push: { joinRequests: userId } })
+		return this.findOneAndUpdate$({ _id: missionId }, { $addToSet: { joinRequests: userId } })
 			.pipe(switchMapTo(of(null)));
 	}
 

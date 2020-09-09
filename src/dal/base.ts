@@ -1,4 +1,4 @@
-import { Observable, bindNodeCallback } from 'rxjs';
+import { Observable, bindNodeCallback, from } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import {
 	MongoClient, MongoError, Collection, OptionalId, InsertOneWriteOpResult, WithId, InsertWriteOpResult, FilterQuery,
@@ -101,7 +101,7 @@ export abstract class BaseDAL<T extends { _id?: any }> {
 		this.collection.find = this.collection.find.bind(this.collection);
 		return (query: FilterQuery<T>, options?: FindOneOptions<T>) =>
 			bindNodeCallback<FilterQuery<T>, FindOneOptions<T>, Cursor<T>>(this.collection.find)
-				.call(query, options).pipe(switchMap((cursor: Cursor<T>) => cursor.toArray()));
+				.call(query, options).pipe(switchMap((cursor: Cursor<T>) => from(cursor.toArray())));
 	}
 
 	get findOne$(): (query: FilterQuery<T>, options?: FindOneOptions<T>) => Observable<T> {

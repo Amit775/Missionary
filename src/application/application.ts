@@ -3,8 +3,10 @@ import { multiInject, inject, injectable } from 'inversify';
 import { urlencoded, json } from 'body-parser';
 import { Logger } from 'winston';
 
+import cors from 'cors'
+
 import { INJECTOR } from '../config/types';
-import { log_request, log_response, log_error } from '../logger/middleware';
+import { log_request, log_response, log_error, catch_error } from '../logger/middleware';
 import { IController } from '../api/controller.interface';
 
 
@@ -22,6 +24,7 @@ export class Application {
 
 	private create(): Express {
 		this.application = express()
+			.use(cors())
 			.use(json(), urlencoded({ extended: true }))
 			.use(log_request(this.logger), log_response(this.logger));
 
@@ -29,7 +32,7 @@ export class Application {
 
 		this.application.get('/', (req: Request, res: Response, next: NextFunction) => res.send('hello world'));
 
-		this.application.use(log_error(this.logger))
+		this.application.use(catch_error, log_error(this.logger))
 
 		return this.application;
 	}

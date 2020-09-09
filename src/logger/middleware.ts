@@ -1,5 +1,6 @@
 import { Logger } from 'winston';
 import { NextFunction, Request, Response, RequestHandler, ErrorRequestHandler } from 'express';
+import { MSError, UnknownError } from './error';
 
 type LoggerMiddleware = (logger: Logger) => RequestHandler | ErrorRequestHandler;
 
@@ -31,10 +32,20 @@ export const log_response: LoggerMiddleware = (logger: Logger) => (req: Request,
 	next();
 }
 
-export const log_error: LoggerMiddleware = (logger: Logger) => (error: any, req: Request, res: Response, next: NextFunction) => {
-	let { message, name, stack } = error;
-	message = message ? `${name}: ${message}` : 'an error occured';
-	const meta = { stack } || { error };
-	logger.log('error', message, meta);
-	next(error);
+export const catch_error: ErrorRequestHandler = (error: any, req: Request, res: Response, next: NextFunction) => {
+	if (error instanceof MSError) return next(error);
+
+	const msError = UnknownError.fromError(error);
+	return next(msError);
+}
+
+export const log_error: LoggerMiddleware = (logger: Logger) => (error: MSError, req: Request, res: Response, next: NextFunction) => {
+	if (res.headersSent) return next(error);
+
+	const { name, message, stack, statusCode } = error;
+	const errorMessage = `${name}: ${message}`;
+
+	logger.log('error', errorMessage, { stack });
+
+	res.status(statusCode).send(errorMessage);
 }

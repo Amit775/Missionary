@@ -11,7 +11,7 @@ export interface IMissionsBL {
 	getAllMissions(): Observable<Mission[]>;
 	getAllMissionsNames(): Observable<string[]>;
 	getMissionById(id: ObjectId): Observable<Mission>;
-	getMissionsByIds(...ids: ObjectId[]): Observable<Mission[]>;
+	getMissionsByIds(ids: ObjectId[]): Observable<Mission[]>;
 	getPermissionsOfUser(userId: string, missionId: ObjectId): Observable<Permission>;
 	exportMission(missionId: ObjectId): Observable<boolean>;
 	askToJoinToMission(userId: string, missionId: ObjectId): Observable<void>;
@@ -31,8 +31,8 @@ export class MissionsBL implements IMissionsBL {
 	getMissionById(id: ObjectId): Observable<Mission> {
 		return this.dal.getMissionById(id);
 	}
-	getMissionsByIds(...ids: ObjectId[]): Observable<Mission[]> {
-		return this.dal.getMissionsByIds(...ids);
+	getMissionsByIds(ids: ObjectId[]): Observable<Mission[]> {
+		return this.dal.getMissionsByIds(ids);
 	}
 	getPermissionsOfUser(userId: string, missionId: ObjectId): Observable<Permission> {
 		return this.dal.getPermissionsOfUser(userId, missionId);
