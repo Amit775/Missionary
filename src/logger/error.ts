@@ -1,51 +1,65 @@
 export class MSError extends Error {
-	get name(): string { return this.name; }
-	get statusCode(): number { return this.statusCode; }
+	type: 'MSError' = 'MSError';
 
-	setStack(stack: any): MSError {
-		this.stack = stack;
-		return this;
-	}
+	constructor(
+		public name: string,
+		public statusCode: number,
+		public message: string
+	) { super(message); }
 }
 
 export class NotFoundError extends MSError {
-	public get name(): string { return 'NotFoundError'; }
-	public get statusCode(): number { return 401; }
-
-	constructor(desiredResource: string) { super(`The resource '${desiredResource}' cannot be found`); }
+	constructor(desiredResource: string) {
+		super(
+			`NotFoundError`,
+			404,
+			`The resource '${desiredResource}' cannot be found`
+		);
+	}
 }
 
 export class MissingArgumentError extends MSError {
-	public get name(): string { return 'MissingArgumentError'; }
-	public get statusCode(): number { return 450; }
-	constructor(public argumentName: string) { super(`The argument '${argumentName}' is missing.`) }
+	constructor(public argumentName: string) {
+		super(
+			`MissingArgumentError`,
+			460,
+			`The argument '${argumentName}' is missing.`
+		);
+	}
 }
 
 export class InvalidArgumentError extends MSError {
-	public get name(): string { return 'InvalidArgumentError'; }
-	public get statusCode(): number { return 451; }
-
-	constructor(public argumentName: string, public argumentValue: string) { super(`The argument '${argumentName}' with value '${argumentValue}' is invalid.`) }
+	constructor(public argumentName: string, public argumentValue: string) {
+		super(
+			`InvalidArgumentError`,
+			461,
+			`The argument '${argumentName}' with value '${argumentValue}' is invalid.`
+		)
+	}
 }
 
-export class UnknownError extends MSError {
-	public get name(): string { return 'UnknownError'; }
-	public get statusCode(): number { return 500; }
-
-	public static fromError(error: Error | string): UnknownError {
+export class GeneralError extends MSError {
+	public static fromError(error: Error | string): GeneralError {
 		if (error instanceof Error) {
-			return new UnknownError(error.message).setStack(error.stack);
+			return (new GeneralError(error.message));
 		} else if (typeof error === 'string') {
-			return new UnknownError(error);
+			return new GeneralError(error);
 		} else {
-			return new UnknownError('An unknown error occured');
+			return new GeneralError('An unknown error occured');
 		}
+	}
+
+	constructor(message: string) {
+		super(`UnknownError`, 500, message)
 	}
 }
 
 export class ActionFailedError extends MSError {
-	public get name(): string { return 'ActionFailedError'; }
-	public get statusCode(): number { return 550; }
-
-	constructor(actionName: string) { super(`The action '${actionName}' couldn't be performed successfully, try again.`) }
+	constructor(actionName: string) {
+		super(
+			`ActionFailedError`,
+			550,
+			`The action '${actionName}' couldn't be performed successfully, try again.`
+		)
+	}
 }

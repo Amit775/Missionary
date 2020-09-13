@@ -79,7 +79,7 @@ export class MissionsDAL extends BaseDAL<Mission> implements IMissionsDAL {
 	}
 
 	getAllMissionsNames(): Observable<string[]> {
-		return this.find$({}, { projection: { _id: false, name: true } })
+		return this.find$({})
 			.pipe(map((missions: Mission[]) => missions.map((mission: Mission) => mission.name)));
 	}
 }

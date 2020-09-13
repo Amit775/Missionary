@@ -36,11 +36,11 @@ export class MissionsController implements IController {
 			});
 		});
 
-		this._router.post('/getMissionById', (req: Request, res: Response, next: NextFunction) => {
-			const { id } = req.body;
+		this._router.get('/GetMissionById', (req: Request, res: Response, next: NextFunction) => {
+			const { id } = req.query;
 			if (!id) return next(new MissingArgumentError('id'));
 
-			const _id: ObjectId = id instanceof ObjectId ? id : new ObjectId(id);
+			const _id: ObjectId = id instanceof ObjectId ? id : new ObjectId(id.toString());
 			this.bl.getMissionById(_id).pipe(take(1)).subscribe({
 				next: (result: Mission) => {
 					if (!result) return next(new NotFoundError(`mission with id: ${_id.toHexString()}`));
@@ -62,13 +62,13 @@ export class MissionsController implements IController {
 			});
 		});
 
-		this._router.post('/getPermissionsOfUser', (req: Request, res: Response, next: NextFunction) => {
-			const { userId, missionId } = req.body;
+		this._router.get('/getPermissionsOfUser', (req: Request, res: Response, next: NextFunction) => {
+			const { userId, missionId } = req.query;
 			if (!userId) return next(new MissingArgumentError('userId'));
 			if (!missionId) return next(new MissingArgumentError('missionId'));
 
-			const _missionId = missionId instanceof ObjectId ? missionId : new ObjectId(missionId);
-			this.bl.getPermissionsOfUser(userId, _missionId).pipe(take(1)).subscribe({
+			const _missionId = missionId instanceof ObjectId ? missionId : new ObjectId(missionId.toString());
+			this.bl.getPermissionsOfUser(userId.toString(), _missionId).pipe(take(1)).subscribe({
 				next: (result: Permission) => res.send(`${result}`), error: error => next(error)
 			});
 		});
