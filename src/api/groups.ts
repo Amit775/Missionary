@@ -3,12 +3,12 @@ import { injectable, inject } from 'inversify';
 
 import { IController } from './controller.interface';
 import { INJECTOR } from '../config/types';
-import { IGroupsBL } from '../bl/groups';
+import { GroupsBL } from '../bl/groups';
 
 
 @injectable()
 export class GroupsController implements IController {
-	@inject(INJECTOR.GroupsBL) private bl: IGroupsBL;
+	@inject(INJECTOR.GroupsBL) private bl: GroupsBL;
 
 	public get router(): Router { return this._router; }
 	public get prefix(): string { return '/Groups'; }

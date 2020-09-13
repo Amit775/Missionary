@@ -2,7 +2,6 @@ import express, { Request, Response, NextFunction, Express } from 'express';
 import { multiInject, inject, injectable } from 'inversify';
 import { urlencoded, json } from 'body-parser';
 import { Logger } from 'winston';
-
 import cors from 'cors'
 
 import { INJECTOR } from '../config/types';

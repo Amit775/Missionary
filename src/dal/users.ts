@@ -7,18 +7,14 @@ import { INJECTOR } from '../config/types';
 import { IConfig } from '../config/injector';
 
 
-export interface IUsersDAL {
-	ok(): boolean;
-}
-
 @injectable()
-export class UsersDAL extends BaseDAL<User> implements IUsersDAL {
+export class UsersDAL extends BaseDAL<User> {
 
 	constructor(
 		@inject(INJECTOR.Config) config: IConfig,
 		@inject(INJECTOR.Logger) logger: Logger,
 	) { super(config, logger, 'users'); }
-	
+
 	public ok(): boolean {
 		return true;
 	}

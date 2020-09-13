@@ -11,22 +11,8 @@ import { BaseDAL } from './base';
 import { Permission } from '../models/permission';
 
 
-export interface IMissionsDAL {
-	getAllMissions(): Observable<Mission[]>;
-	getAllMissionsNames(): Observable<string[]>;
-	getMissionById(id: ObjectId): Observable<Mission>;
-	getMissionsByIds(ids: ObjectId[]): Observable<Mission[]>;
-	getPermissionsOfUser(userId: string, missionId: ObjectId): Observable<Permission>;
-	exportMission(missionId: ObjectId): Observable<boolean>;
-	askToJoinToMission(userId: string, missionId: ObjectId): Observable<void>;
-	createMission(mission: Mission): Observable<Mission>;
-	leaveMission(userId: string, missionId: ObjectId): Observable<void>;
-	getAllMissionsOfUser(userId: string): Observable<Mission[]>;
-	updateMission(mission: Mission): Observable<Mission>;
-}
-
 @injectable()
-export class MissionsDAL extends BaseDAL<Mission> implements IMissionsDAL {
+export class MissionsDAL extends BaseDAL<Mission> {
 	constructor(
 		@inject(INJECTOR.Config) config: IConfig,
 		@inject(INJECTOR.Logger) logger: Logger,

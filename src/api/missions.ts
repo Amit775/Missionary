@@ -7,14 +7,14 @@ import { ObjectId } from 'mongodb';
 
 import { Mission } from '../models/mission';
 import { INJECTOR } from '../config/types';
-import { IMissionsBL } from '../bl/missions';
+import { MissionsBL } from '../bl/missions';
 import { IController } from './controller.interface';
 import { MissingArgumentError, InvalidArgumentError } from '../logger/error';
 
 
 @injectable()
 export class MissionsController implements IController {
-	@inject(INJECTOR.MissionsBL) private bl: IMissionsBL
+	@inject(INJECTOR.MissionsBL) private bl: MissionsBL
 
 	public get prefix(): string { return '/missions'; }
 	public get router(): Router { return this._router; }
@@ -119,10 +119,10 @@ export class MissionsController implements IController {
 		});
 
 		this._router.post('/getAllMissionsOfUser', (req: Request, res: Response, next: NextFunction) => {
-			const { userId } = req.body;
+			const { userId } = req.query;
 			if (!userId) return next(new MissingArgumentError('userId'));
 
-			this.bl.getAllMissionsOfUser(userId).pipe(take(1)).subscribe({
+			this.bl.getAllMissionsOfUser(userId.toString()).pipe(take(1)).subscribe({
 				next: (result: Mission[]) => res.send(result), error: error => next(error)
 			});
 		});

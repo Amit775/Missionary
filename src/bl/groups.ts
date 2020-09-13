@@ -1,16 +1,13 @@
 import { injectable, inject } from 'inversify';
 
-import { IGroupsDAL } from './../dal/groups';
+import { GroupsDAL } from './../dal/groups';
 import { INJECTOR } from '../config/types';
 
 
-export interface IGroupsBL {
-	ok(): boolean;
-}
 
 @injectable()
-export class GroupsBL implements IGroupsBL {
-	@inject(INJECTOR.GroupsDAL) private dal: IGroupsDAL;
+export class GroupsBL {
+	@inject(INJECTOR.GroupsDAL) private dal: GroupsDAL;
 
 	public ok(): boolean {
 		return this.dal.ok();
