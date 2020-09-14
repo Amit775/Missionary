@@ -28,7 +28,7 @@ export abstract class BaseDAL<T extends { _id?: any }> {
 		new MongoClient(this.config.db.uri, { useNewUrlParser: true, useUnifiedTopology: true })
 			.connect((error: MongoError, client: MongoClient) => {
 				if (error) {
-					console.log(error.message);
+					this.logger.error(error.message);
 					return;
 				};
 

@@ -5,7 +5,9 @@ import { ObjectId } from 'mongodb';
 
 import { INJECTOR } from '../config/types';
 import { Permission } from '../models/permission';
-import { Mission } from '../models/mission';
+import { Mission, NewMission } from '../models/mission';
+import { State } from '../models/state';
+import { User } from 'src/models/user';
 
 @injectable()
 export class MissionsBL {
@@ -29,7 +31,26 @@ export class MissionsBL {
 	askToJoinToMission(userId: string, missionId: ObjectId): Observable<void> {
 		return this.dal.askToJoinToMission(userId, missionId);
 	}
-	createMission(mission: Mission): Observable<Mission> {
+	createMission(newMission: NewMission): Observable<Mission> {
+		const user: User = {
+			_id: 'id current user',
+			name: 'current user',
+			hierarchy: 'current/user'
+		};
+
+		const mission: Mission = {
+			...newMission,
+			_id: null,
+			createdTime: new Date(),
+			updatedTime: new Date(),
+			creator: user,
+			isExported: false,
+			joinRequests: [],
+			sequence: 'getMaxSequence'.length,
+			state: State.CREATED,
+			users: [{ ...user, permission: Permission.ADMIN }]
+		}
+
 		return this.dal.createMission(mission);
 	}
 	leaveMission(userId: string, missionId: ObjectId): Observable<void> {

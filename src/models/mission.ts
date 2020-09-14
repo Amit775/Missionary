@@ -3,6 +3,7 @@ import { ObjectId } from 'mongodb';
 import { User, UserWithPermission } from './user';
 import { State } from './state';
 
+export type NewMission = Pick<Mission, 'name' | 'description' | 'type'>
 
 export interface Mission {
 	_id: ObjectId;

@@ -5,12 +5,11 @@ import { inject, injectable } from 'inversify';
 import { take } from 'rxjs/operators';
 import { ObjectId } from 'mongodb';
 
-import { Mission } from '../models/mission';
+import { Mission, NewMission } from '../models/mission';
 import { INJECTOR } from '../config/types';
 import { MissionsBL } from '../bl/missions';
 import { IController } from './controller.interface';
 import { MissingArgumentError, InvalidArgumentError } from '../logger/error';
-
 
 @injectable()
 export class MissionsController implements IController {
@@ -100,9 +99,12 @@ export class MissionsController implements IController {
 		});
 
 		this._router.post('/createMission', (req: Request, res: Response, next: NextFunction) => {
-			const mission: Mission = req.body;
+			const newMission: NewMission = req.body;
+			if (!newMission.name) return next(new MissingArgumentError('name'));
+			if (!newMission.description) return next(new MissingArgumentError('description'));
+			if (!newMission.type) return next(new MissingArgumentError('type'));
 
-			this.bl.createMission(mission).pipe(take(1)).subscribe({
+			this.bl.createMission(newMission).pipe(take(1)).subscribe({
 				next: (result: Mission) => res.send(result), error: error => next(error)
 			});
 		});
@@ -118,7 +120,7 @@ export class MissionsController implements IController {
 			});
 		});
 
-		this._router.post('/getAllMissionsOfUser', (req: Request, res: Response, next: NextFunction) => {
+		this._router.get('/getAllMissionsOfUser', (req: Request, res: Response, next: NextFunction) => {
 			const { userId } = req.query;
 			if (!userId) return next(new MissingArgumentError('userId'));
 
