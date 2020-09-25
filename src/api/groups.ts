@@ -17,6 +17,6 @@ export class GroupsController implements IController {
 
 	constructor() {
 		this._router = express.Router()
-			.get('/', (req, res) => res.send(true));
+			.get('/', (request, response) => response.send(true));
 	}
 }

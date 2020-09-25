@@ -30,6 +30,11 @@ export class MissionsDAL extends BaseDAL<Mission> {
 		return this.find$({ _id: { $in: ids } });
 	}
 
+	getAllMissionsNames(): Observable<string[]> {
+		return this.find$({})
+			.pipe(map((missions: Mission[]) => missions.map((mission: Mission) => mission.name)));
+	}
+
 	getPermissionsOfUser(userId: string, missionId: ObjectId): Observable<Permission> {
 		return this.getMissionById(missionId)
 			.pipe(map(mission => mission.users.find(user => user._id === userId).permission));
@@ -62,10 +67,5 @@ export class MissionsDAL extends BaseDAL<Mission> {
 	updateMission(mission: Mission): Observable<Mission> {
 		return this.findOneAndReplace$({ _id: mission._id }, mission)
 			.pipe(map(result => result.value));
-	}
-
-	getAllMissionsNames(): Observable<string[]> {
-		return this.find$({})
-			.pipe(map((missions: Mission[]) => missions.map((mission: Mission) => mission.name)));
 	}
 }

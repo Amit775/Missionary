@@ -1,9 +1,9 @@
 {
-	"name": "node",
+	"name": "missionary",
 	"version": "1.0.0",
-	"main": "./dist/app.js",
+	"main": "./dist/src/app.js",
 	"exports": [
-		"./dist/app.js"
+		"./dist/src/app.js"
 	],
 	"license": "MIT",
 	"scripts": {

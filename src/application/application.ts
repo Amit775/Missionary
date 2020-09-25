@@ -29,7 +29,7 @@ export class Application {
 
 		this.controllers.forEach(controller => this.application.use(controller.prefix, controller.router));
 
-		this.application.get('/', (req: Request, res: Response, next: NextFunction) => res.send('hello world'));
+		this.application.get('/', (request: Request, response: Response, next: NextFunction) => response.send('hello world'));
 
 		this.application.use(catch_error, log_error(this.logger))
 

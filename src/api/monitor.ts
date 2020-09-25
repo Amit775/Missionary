@@ -15,7 +15,7 @@ export class MonitorController implements IController {
 
 	constructor() {
 		this._router = express.Router()
-			.get('/isAlive', (req: Request, res: Response, next: NextFunction) => res.send(true))
-			.get('/isFunctioning', (req: Request, res: Response, next: NextFunction) => res.send(test()));
+			.get('/isAlive', (request: Request, response: Response, next: NextFunction) => response.send(true))
+			.get('/isFunctioning', (request: Request, response: Response, next: NextFunction) => response.send(test()));
 	}
 }

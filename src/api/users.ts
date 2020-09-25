@@ -17,6 +17,6 @@ export class UsersController implements IController {
 
 	constructor() {
 		this._router = express.Router()
-			.get('/', (req, res) => res.send(this.bl.ok()));
+			.get('/', (request, response) => response.send(this.bl.ok()));
 	}
 }

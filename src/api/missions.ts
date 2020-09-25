@@ -1,6 +1,6 @@
 import { NotFoundError, ActionFailedError } from './../logger/error';
 import { Permission } from './../models/permission';
-import express, { Router, Request, Response, NextFunction } from 'express';
+import { default as express,  Router, Request, Response, NextFunction } from 'express';
 import { inject, injectable } from 'inversify';
 import { take } from 'rxjs/operators';
 import { ObjectId } from 'mongodb';
@@ -23,20 +23,20 @@ export class MissionsController implements IController {
 	constructor() {
 		this._router = express.Router();
 
-		this._router.get('/getAllMissions', (req: Request, res: Response, next: NextFunction) => {
+		this._router.get('/getAllMissions', async (request: Request, response: Response, next: NextFunction) => {
 			this.bl.getAllMissions().pipe(take(1)).subscribe({
-				next: (result: Mission[]) => res.send(result), error: error => next(error)
+				next: (result: Mission[]) => response.send(result), error: error => next(error)
 			});
 		});
 
-		this._router.get('/getAllMissionsNames', (req: Request, res: Response, next: NextFunction) => {
+		this._router.get('/getAllMissionsNames', (request: Request, response: Response, next: NextFunction) => {
 			this.bl.getAllMissionsNames().pipe(take(1)).subscribe({
-				next: (result: string[]) => res.send(result), error: error => next(error)
+				next: (result: string[]) => response.send(result), error: error => next(error)
 			});
 		});
 
-		this._router.get('/GetMissionById', (req: Request, res: Response, next: NextFunction) => {
-			const { id } = req.query;
+		this._router.get('/GetMissionById', (request: Request, response: Response, next: NextFunction) => {
+			const { id } = request.query;
 			if (!id) return next(new MissingArgumentError('id'));
 
 			const _id: ObjectId = id instanceof ObjectId ? id : new ObjectId(id.toString());
@@ -44,36 +44,37 @@ export class MissionsController implements IController {
 				next: (result: Mission) => {
 					if (!result) return next(new NotFoundError(`mission with id: ${_id.toHexString()}`));
 
-					res.send(result)
+					response.send(result)
 				},
 				error: error => next(error)
 			});
 		});
 
-		this._router.post('/getMissionsByIds', (req: Request, res: Response, next: NextFunction) => {
-			const { ids } = req.body;
+		// Todo: check if neccessery
+		this._router.post('/getMissionsByIds', (request: Request, response: Response, next: NextFunction) => {
+			const { ids } = request.body;
 			if (!ids) return next(new MissingArgumentError('ids'));
 			if (!Array.isArray(ids) || ids.length === 0) return next(new InvalidArgumentError('ids', ids));
 
 			const _ids: ObjectId[] = ids.map((id: string | ObjectId) => id instanceof ObjectId ? id : new ObjectId(id));
 			this.bl.getMissionsByIds(_ids).pipe(take(1)).subscribe({
-				next: (result: Mission[]) => res.send(result), error: error => next(error)
+				next: (result: Mission[]) => response.send(result), error: error => next(error)
 			});
 		});
 
-		this._router.get('/getPermissionsOfUser', (req: Request, res: Response, next: NextFunction) => {
-			const { userId, missionId } = req.query;
+		this._router.get('/getPermissionsOfUser', (request: Request, response: Response, next: NextFunction) => {
+			const { userId, missionId } = request.query;
 			if (!userId) return next(new MissingArgumentError('userId'));
 			if (!missionId) return next(new MissingArgumentError('missionId'));
 
 			const _missionId = missionId instanceof ObjectId ? missionId : new ObjectId(missionId.toString());
 			this.bl.getPermissionsOfUser(userId.toString(), _missionId).pipe(take(1)).subscribe({
-				next: (result: Permission) => res.send(`${result}`), error: error => next(error)
+				next: (result: Permission) => response.send(`${result}`), error: error => next(error)
 			});
 		});
 
-		this._router.put('/exportMission', (req: Request, res: Response, next: NextFunction) => {
-			const { missionId } = req.body;
+		this._router.put('/exportMission', (request: Request, response: Response, next: NextFunction) => {
+			const { missionId } = request.body;
 			if (!missionId) return next(new MissingArgumentError('missionId'));
 
 			const _missionId = missionId instanceof ObjectId ? missionId : new ObjectId(missionId);
@@ -81,59 +82,59 @@ export class MissionsController implements IController {
 				next: (result: boolean) => {
 					if (!result) return next(new ActionFailedError('export mission'));
 
-					res.send(result)
+					response.send(result)
 				},
 				error: error => next(error)
 			});
 		});
 
-		this._router.put('/askToJoinToMission', (req: Request, res: Response, next: NextFunction) => {
-			const { userId, missionId } = req.body;
+		this._router.put('/askToJoinToMission', (request: Request, response: Response, next: NextFunction) => {
+			const { userId, missionId } = request.body;
 			if (!userId) return next(new MissingArgumentError('userId'));
 			if (!missionId) return next(new MissingArgumentError('missionId'));
 
 			const _missionId = missionId instanceof ObjectId ? missionId : new ObjectId(missionId);
 			this.bl.askToJoinToMission(userId, _missionId).pipe(take(1)).subscribe({
-				next: (result: void) => res.send(result), error: error => next(error)
+				next: (result: void) => response.send(result), error: error => next(error)
 			});
 		});
 
-		this._router.post('/createMission', (req: Request, res: Response, next: NextFunction) => {
-			const newMission: NewMission = req.body;
+		this._router.post('/createMission', (request: Request, response: Response, next: NextFunction) => {
+			const newMission: NewMission = request.body;
 			if (!newMission.name) return next(new MissingArgumentError('name'));
 			if (!newMission.description) return next(new MissingArgumentError('description'));
 			if (!newMission.type) return next(new MissingArgumentError('type'));
 
 			this.bl.createMission(newMission).pipe(take(1)).subscribe({
-				next: (result: Mission) => res.send(result), error: error => next(error)
+				next: (result: Mission) => response.send(result), error: error => next(error)
 			});
 		});
 
-		this._router.put('/leaveMission', (req: Request, res: Response, next: NextFunction) => {
-			const { userId, missionId } = req.body;
+		this._router.put('/leaveMission', (request: Request, response: Response, next: NextFunction) => {
+			const { userId, missionId } = request.body;
 			if (!userId) return next(new MissingArgumentError('userId'));
 			if (!missionId) return next(new MissingArgumentError('missionId'));
 
 			const _missionId = missionId instanceof ObjectId ? missionId : new ObjectId(missionId);
 			this.bl.leaveMission(userId, _missionId).pipe(take(1)).subscribe({
-				next: (result: void) => res.send(result), error: error => next(error)
+				next: (result: void) => response.send(result), error: error => next(error)
 			});
 		});
 
-		this._router.get('/getAllMissionsOfUser', (req: Request, res: Response, next: NextFunction) => {
-			const { userId } = req.query;
+		this._router.get('/getAllMissionsOfUser', (request: Request, response: Response, next: NextFunction) => {
+			const { userId } = request.query;
 			if (!userId) return next(new MissingArgumentError('userId'));
 
 			this.bl.getAllMissionsOfUser(userId.toString()).pipe(take(1)).subscribe({
-				next: (result: Mission[]) => res.send(result), error: error => next(error)
+				next: (result: Mission[]) => response.send(result), error: error => next(error)
 			});
 		});
 
-		this._router.put('/updateMission', (req: Request, res: Response, next: NextFunction) => {
-			const mission: Mission = req.body;
+		this._router.put('/updateMission', (request: Request, response: Response, next: NextFunction) => {
+			const mission: Mission = request.body;
 			mission._id = mission._id instanceof ObjectId ? mission._id : new ObjectId(mission._id);
 			this.bl.updateMission(mission).pipe(take(1)).subscribe({
-				next: (result: Mission) => res.send(result), error: error => next(error)
+				next: (result: Mission) => response.send(result), error: error => next(error)
 			});
 		});
 	};
