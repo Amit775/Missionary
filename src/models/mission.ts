@@ -3,7 +3,8 @@ import { ObjectId } from 'mongodb';
 import { User, UserWithPermission } from './user';
 import { State } from './state';
 
-export type NewMission = Pick<Mission, 'name' | 'description' | 'type'>
+export type BaseMission = Pick<Mission, 'name' | 'description'>
+export type UpdateableMission = Pick<Mission, '_id'> & Partial<BaseMission>;
 
 export interface Mission {
 	_id: ObjectId;
@@ -13,7 +14,6 @@ export interface Mission {
 	creator: User;
 	createdTime: Date;
 	updatedTime: Date;
-	type: string;
 	joinRequests: string[];
 	state: State;
 	sequence: number;

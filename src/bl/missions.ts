@@ -5,7 +5,7 @@ import { ObjectId } from 'mongodb';
 
 import { INJECTOR } from '../config/types';
 import { Permission } from '../models/permission';
-import { Mission, NewMission } from '../models/mission';
+import { Mission, BaseMission, UpdateableMission } from '../models/mission';
 import { State } from '../models/state';
 import { User } from 'src/models/user';
 
@@ -31,7 +31,7 @@ export class MissionsBL {
 	askToJoinToMission(userId: string, missionId: ObjectId): Observable<void> {
 		return this.dal.askToJoinToMission(userId, missionId);
 	}
-	createMission(newMission: NewMission): Observable<Mission> {
+	createMission(newMission: BaseMission): Observable<Mission> {
 		const user: User = {
 			_id: 'id current user',
 			name: 'current user',
@@ -59,7 +59,7 @@ export class MissionsBL {
 	getAllMissionsOfUser(userId: string): Observable<Mission[]> {
 		return this.dal.getAllMissionsOfUser(userId);
 	}
-	updateMission(mission: Mission): Observable<Mission> {
+	updateMission(mission: UpdateableMission): Observable<Mission> {
 		return this.dal.updateMission(mission);
 	}
 	getAllMissionsNames(): Observable<string[]> {

@@ -5,7 +5,7 @@ import { inject, injectable } from 'inversify';
 import { take } from 'rxjs/operators';
 import { ObjectId } from 'mongodb';
 
-import { Mission, NewMission } from '../models/mission';
+import { Mission, BaseMission, UpdateableMission } from '../models/mission';
 import { INJECTOR } from '../config/types';
 import { MissionsBL } from '../bl/missions';
 import { IController } from './controller.interface';
@@ -100,10 +100,9 @@ export class MissionsController implements IController {
 		});
 
 		this._router.post('/createMission', (request: Request, response: Response, next: NextFunction) => {
-			const newMission: NewMission = request.body;
+			const newMission: BaseMission = request.body;
 			if (!newMission.name) return next(new MissingArgumentError('name'));
 			if (!newMission.description) return next(new MissingArgumentError('description'));
-			if (!newMission.type) return next(new MissingArgumentError('type'));
 
 			this.bl.createMission(newMission).pipe(take(1)).subscribe({
 				next: (result: Mission) => response.send(result), error: error => next(error)
@@ -131,7 +130,9 @@ export class MissionsController implements IController {
 		});
 
 		this._router.put('/updateMission', (request: Request, response: Response, next: NextFunction) => {
-			const mission: Mission = request.body;
+			const mission: UpdateableMission = request.body;
+			if (!mission._id) return next(new MissingArgumentError('mission._id'))
+			
 			mission._id = mission._id instanceof ObjectId ? mission._id : new ObjectId(mission._id);
 			this.bl.updateMission(mission).pipe(take(1)).subscribe({
 				next: (result: Mission) => response.send(result), error: error => next(error)

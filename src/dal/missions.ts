@@ -6,7 +6,7 @@ import { injectable, inject } from 'inversify';
 
 import { INJECTOR } from '../config/types';
 import { IConfig } from '../config/injector';
-import { Mission } from '../models/mission';
+import { Mission, UpdateableMission } from '../models/mission';
 import { BaseDAL } from './base';
 import { Permission } from '../models/permission';
 
@@ -64,7 +64,7 @@ export class MissionsDAL extends BaseDAL<Mission> {
 		return this.find$({ users: { $all: [{ $elemMatch: { _id: userId } }] } });
 	}
 
-	updateMission(mission: Mission): Observable<Mission> {
+	updateMission(mission: UpdateableMission): Observable<Mission> {
 		return this.findOneAndReplace$({ _id: mission._id }, mission)
 			.pipe(map(result => result.value));
 	}
