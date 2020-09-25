@@ -56,7 +56,7 @@ export class MissionsDAL extends BaseDAL<Mission> {
 	}
 
 	getAllMissionsOfUser(userId: string): Observable<Mission[]> {
-		return this.find$({ users: { $all: [{ '$elemMatch': { _id: userId } }] } });
+		return this.find$({ users: { $all: [{ $elemMatch: { _id: userId } }] } });
 	}
 
 	updateMission(mission: Mission): Observable<Mission> {
