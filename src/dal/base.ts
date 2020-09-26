@@ -169,7 +169,6 @@ export abstract class BaseDAL<T extends { _id?: any }> {
 		return bindNodeCallback(this.collection.stats);
 	}
 
-
 	get updateMany$(): (filter: FilterQuery<T>, update: UpdateQuery<T> | Partial<T>, options?: UpdateManyOptions) => Observable<UpdateWriteOpResult> {
 		this.collection.updateMany = this.collection.updateMany.bind(this.collection);
 		return bindNodeCallback(this.collection.updateMany);

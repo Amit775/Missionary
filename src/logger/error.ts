@@ -45,12 +45,12 @@ export class GeneralError extends MSError {
 		} else if (typeof error === 'string') {
 			return new GeneralError(error);
 		} else {
-			return new GeneralError('An unknown error occured');
+			return new GeneralError('An error occured');
 		}
 	}
 
 	constructor(message: string) {
-		super(`UnknownError`, 500, message)
+		super(`GeneralError`, 500, message)
 	}
 }
 

@@ -1,5 +1,5 @@
 import { MissionsDAL } from './../dal/missions';
-import { Observable } from 'rxjs';
+import { merge, Observable } from 'rxjs';
 import { injectable, inject } from 'inversify';
 import { ObjectId } from 'mongodb';
 
@@ -7,7 +7,11 @@ import { INJECTOR } from '../config/types';
 import { Permission } from '../models/permission';
 import { Mission, BaseMission, UpdateableMission } from '../models/mission';
 import { State } from '../models/state';
-import { User } from 'src/models/user';
+import { User } from '../models/user';
+
+function getUserById(userId: string): User {
+	return { _id: userId, name: 'some name', hierarchy: 'some/hierarchy' };
+}
 
 @injectable()
 export class MissionsBL {
@@ -25,21 +29,17 @@ export class MissionsBL {
 	getPermissionsOfUser(userId: string, missionId: ObjectId): Observable<Permission> {
 		return this.dal.getPermissionsOfUser(userId, missionId);
 	}
-	exportMission(missionId: ObjectId): Observable<boolean> {
-		return this.dal.exportMission(missionId);
+	getAllMissionsOfUser(userId: string): Observable<Mission[]> {
+		return this.dal.getAllMissionsOfUser(userId);
 	}
-	askToJoinToMission(userId: string, missionId: ObjectId): Observable<void> {
-		return this.dal.askToJoinToMission(userId, missionId);
+	getAllMissionsNames(): Observable<string[]> {
+		return this.dal.getAllMissionsNames();
 	}
-	createMission(newMission: BaseMission): Observable<Mission> {
-		const user: User = {
-			_id: 'id current user',
-			name: 'current user',
-			hierarchy: 'current/user'
-		};
+	createMission(baseMission: BaseMission): Observable<Mission> {
+		const user: User = getUserById('currentUser');
 
 		const mission: Mission = {
-			...newMission,
+			...baseMission,
 			_id: null,
 			createdTime: new Date(),
 			updatedTime: new Date(),
@@ -53,16 +53,37 @@ export class MissionsBL {
 
 		return this.dal.createMission(mission);
 	}
-	leaveMission(userId: string, missionId: ObjectId): Observable<void> {
-		return this.dal.leaveMission(userId, missionId);
-	}
-	getAllMissionsOfUser(userId: string): Observable<Mission[]> {
-		return this.dal.getAllMissionsOfUser(userId);
-	}
 	updateMission(mission: UpdateableMission): Observable<Mission> {
 		return this.dal.updateMission(mission);
 	}
-	getAllMissionsNames(): Observable<string[]> {
-		return this.dal.getAllMissionsNames();
+	setExportedMission(missionId: ObjectId, isExported: boolean): Observable<boolean> {
+		return this.dal.setExportedMission(missionId, isExported);
+	}
+	askToJoinToMission(userId: string, missionId: ObjectId): Observable<void> {
+		return this.dal.addToJoinRequest(userId, missionId);
+	}
+	cancelOrDeclineJoinRequest(userId: string, missionId: ObjectId): Observable<void> {
+		return this.dal.removeFromJoinRequest(userId, missionId);
+	}
+	acceptJoinRequest(userId: string, permission: Permission, missionId: ObjectId): Observable<void> {
+		const user: User = getUserById(userId);
+		return merge(
+			this.dal.removeFromJoinRequest(userId, missionId),
+			this.dal.addUserToMission(user, permission, missionId)
+		);
+	}
+	addUserToMission(userId: string, permission: Permission, missionId: ObjectId): Observable<void> {
+		const user: User = getUserById(userId);
+		return this.dal.addUserToMission(user, permission, missionId);
+	}
+	changeUserPermission(userId: string, permission: Permission, missionId: ObjectId): Observable<void> {
+		const user: User = getUserById(userId);
+		return merge(
+			this.dal.removeUserFromMission(userId, missionId),
+			this.dal.addUserToMission(user, permission, missionId)
+		);
+	}
+	leaveOrRemoveUserFromMission(userId: string, missionId: ObjectId): Observable<void> {
+		return this.dal.removeUserFromMission(userId, missionId);
 	}
 }
