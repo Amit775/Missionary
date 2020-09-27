@@ -1,7 +1,7 @@
 import { Router } from 'express';
 
 
-export interface IController {
+export interface API {
 	router: Router;
 	prefix: string;
 }

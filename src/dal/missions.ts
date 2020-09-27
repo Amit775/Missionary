@@ -4,8 +4,7 @@ import { FindAndModifyWriteOpResultObject, FindOneAndUpdateOption, ObjectId, Upd
 import { Logger } from 'winston';
 import { injectable, inject } from 'inversify';
 
-import { INJECTOR } from '../config/types';
-import { IConfig } from '../config/injector';
+import { IConfig, INJECTOR } from '../config/injector';
 import { Mission, UpdateableMission } from '../models/mission';
 import { BaseDAL } from './base';
 import { Permission } from '../models/permission';

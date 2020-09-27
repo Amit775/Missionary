@@ -1,17 +1,16 @@
-import { ObjectId } from 'mongodb';
-import { BaseGroup, Group, UpdateableGroup } from './../models/group';
-import express, { NextFunction, Request, Response, Router } from 'express';
+import { default as express, NextFunction, Request, Response, Router } from 'express';
 import { injectable, inject } from 'inversify';
+import { ObjectId } from 'mongodb';
 
-import { IController } from './controller.interface';
-import { INJECTOR } from '../config/types';
+import { API } from './api';
+import { INJECTOR } from '../config/injector';
 import { GroupsBL } from '../bl/groups';
-import { MissingArgumentError } from 'src/logger/error';
-import { group } from 'console';
+import { MissingArgumentError } from '../logger/error';
+import { BaseGroup, Group, UpdateableGroup } from '../models/group';
 
 
 @injectable()
-export class GroupsController implements IController {
+export class GroupsAPI implements API {
 	@inject(INJECTOR.GroupsBL) private bl: GroupsBL;
 
 	public get router(): Router { return this._router; }

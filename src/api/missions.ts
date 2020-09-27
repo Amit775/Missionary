@@ -4,15 +4,15 @@ import { take } from 'rxjs/operators';
 import { ObjectId } from 'mongodb';
 
 import { Mission, BaseMission, UpdateableMission } from '../models/mission';
-import { INJECTOR } from '../config/types';
+import { INJECTOR } from '../config/injector';
 import { MissionsBL } from '../bl/missions';
-import { IController } from './controller.interface';
+import { API } from './api';
 import { MissingArgumentError, InvalidArgumentError, NotFoundError, ActionFailedError } from '../logger/error';
-import { Permission } from './../models/permission';
+import { Permission } from '../models/permission';
 
 
 @injectable()
-export class MissionsController implements IController {
+export class MissionsAPI implements API {
 	@inject(INJECTOR.MissionsBL) private bl: MissionsBL
 
 	public get prefix(): string { return '/missions'; }

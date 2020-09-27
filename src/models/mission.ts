@@ -3,8 +3,6 @@ import { ObjectId } from 'mongodb';
 import { User, UserWithPermission } from './user';
 import { State } from './state';
 
-export type BaseMission = Pick<Mission, 'name' | 'description'>
-export type UpdateableMission = Pick<Mission, '_id'> & Partial<BaseMission>;
 
 export interface Mission {
 	_id: ObjectId;
@@ -19,3 +17,6 @@ export interface Mission {
 	sequence: number;
 	isExported: boolean;
 }
+
+export type BaseMission = Pick<Mission, 'name' | 'description'>
+export type UpdateableMission = Pick<Mission, '_id'> & Partial<BaseMission>;

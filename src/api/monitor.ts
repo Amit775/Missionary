@@ -1,13 +1,13 @@
-import express, { Router, Request, Response, NextFunction } from 'express';
+import { default as express, Router, Request, Response, NextFunction } from 'express';
 import { injectable } from 'inversify';
 
-import { IController } from './controller.interface';
+import { API } from './api';
+
 
 const test = () => true;
 
-
 @injectable()
-export class MonitorController implements IController {
+export class MonitorAPI implements API {
 	public get router(): Router { return this._router; }
 	public get prefix(): string { return '/monitor'; }
 

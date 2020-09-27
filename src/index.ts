@@ -1,7 +1,6 @@
 import 'reflect-metadata';
 
-import { INJECTOR } from './config/types';
-import { Injector } from './config/injector';
+import { Injector, INJECTOR } from './config/injector';
 import { Application } from './application/application';
 
 

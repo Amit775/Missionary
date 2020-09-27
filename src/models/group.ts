@@ -3,9 +3,6 @@ import { ObjectId } from 'mongodb';
 import { User, UserWithRole } from './user';
 
 
-export type BaseGroup = Pick<Group, 'name' | 'description'>
-export type UpdateableGroup = Pick<Group, '_id'> & Partial<BaseGroup>;
-
 export interface Group {
 	_id: ObjectId;
 	name: string;
@@ -14,3 +11,6 @@ export interface Group {
 	users: UserWithRole[];
 	joinRequests: string[];
 }
+
+export type BaseGroup = Pick<Group, 'name' | 'description'>
+export type UpdateableGroup = Pick<Group, '_id'> & Partial<BaseGroup>;

@@ -1,13 +1,13 @@
-import express, { Router } from 'express';
+import { default as express, Router } from 'express';
 import { injectable, inject } from 'inversify';
 
-import { IController } from './controller.interface';
+import { API } from './api';
 import { UsersBL } from '../bl/users';
-import { INJECTOR } from '../config/types';
+import { INJECTOR } from '../config/injector';
 
 
 @injectable()
-export class UsersController implements IController {
+export class UsersAPI implements API {
 	@inject(INJECTOR.UsersBL) private bl: UsersBL;
 
 	public get router(): Router { return this._router; }

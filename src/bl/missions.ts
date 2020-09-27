@@ -1,13 +1,14 @@
-import { MissionsDAL } from './../dal/missions';
 import { merge, Observable } from 'rxjs';
 import { injectable, inject } from 'inversify';
 import { ObjectId } from 'mongodb';
 
-import { INJECTOR } from '../config/types';
+import { INJECTOR } from '../config/injector';
+import { MissionsDAL } from '../dal/missions';
 import { Permission } from '../models/permission';
 import { Mission, BaseMission, UpdateableMission } from '../models/mission';
 import { State } from '../models/state';
 import { User } from '../models/user';
+
 
 function getUserById(userId: string): User {
 	return { _id: userId, name: 'some name', hierarchy: 'some/hierarchy' };

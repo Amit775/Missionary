@@ -3,8 +3,7 @@ import { Logger } from 'winston';
 
 import { User } from '../models/user';
 import { BaseDAL } from './base';
-import { INJECTOR } from '../config/types';
-import { IConfig } from '../config/injector';
+import { INJECTOR, IConfig } from '../config/injector';
 
 
 @injectable()

@@ -6,8 +6,7 @@ import { map, switchMapTo } from 'rxjs/operators';
 
 import { Group } from '../models/group';
 import { UserWithRole } from '../models/user';
-import { IConfig } from '../config/injector';
-import { INJECTOR } from '../config/types';
+import { IConfig, INJECTOR } from '../config/injector';
 import { BaseDAL } from './base';
 
 

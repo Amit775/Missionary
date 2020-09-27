@@ -1,13 +1,13 @@
-import { BaseGroup, Group } from './../models/group';
 import { injectable, inject } from 'inversify';
+import { ObjectId } from 'mongodb';
+import { Observable } from 'rxjs';
 
 import { GroupsDAL } from '../dal/groups';
-import { INJECTOR } from '../config/types';
+import { INJECTOR } from '../config/injector';
 import { User } from '../models/user';
-import { ObjectId } from 'mongodb';
-import { UpdateableGroup } from 'src/models/group';
-import { Observable } from 'rxjs';
-import { Role } from 'src/models/permission';
+import { UpdateableGroup, BaseGroup, Group } from '../models/group';
+import { Role } from '../models/permission';
+
 
 function getUserById(userId: string): User {
 	return { _id: userId, name: 'somename', hierarchy: 'some/hierarchy' };
