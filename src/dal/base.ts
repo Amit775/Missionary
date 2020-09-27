@@ -22,7 +22,7 @@ export abstract class BaseDAL<T extends { _id?: any }> {
 
 	constructor(
 		@unmanaged() private config: IConfig,
-		@unmanaged() private logger: Logger,
+		@unmanaged() protected logger: Logger,
 		name: string
 	) {
 		new MongoClient(this.config.db.uri, { useNewUrlParser: true, useUnifiedTopology: true })
@@ -33,7 +33,7 @@ export abstract class BaseDAL<T extends { _id?: any }> {
 				};
 
 				this.collection = client.db(this.config.db.name).collection(name);
-				this.logger.log('info', 'db connected successfully to collection ' + name);
+				this.logger.info('db connected successfully to collection ' + name);
 			});
 	}
 
@@ -177,5 +177,13 @@ export abstract class BaseDAL<T extends { _id?: any }> {
 	get updateOne$(): (filter: FilterQuery<T>, update: UpdateQuery<T> | Partial<T>, options?: UpdateOneOptions) => Observable<UpdateWriteOpResult> {
 		this.collection.updateOne = this.collection.updateOne.bind(this.collection);
 		return bindNodeCallback(this.collection.updateOne);
+	}
+
+	isUpdateOk(): (result: FindAndModifyWriteOpResultObject<T>) => boolean {
+		return (result: FindAndModifyWriteOpResultObject<T>) => {
+			if (!result.ok) this.logger.error('error in update db', { error: result.lastErrorObject })
+
+			return result.ok === 1;
+		}
 	}
 }

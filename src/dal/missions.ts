@@ -1,7 +1,7 @@
-import { FindAndModifyWriteOpResultObject, FindOneAndUpdateOption, ObjectId, UpdateQuery } from 'mongodb';
+import { FindAndModifyWriteOpResultObject, FindOneAndUpdateOption, InsertOneWriteOpResult, ObjectId, UpdateQuery } from 'mongodb';
 import { injectable, inject } from 'inversify';
 import { Logger } from 'winston';
-import { Observable, of } from 'rxjs';
+import { Observable } from 'rxjs';
 import { map, switchMapTo } from 'rxjs/operators';
 
 import { IConfig, INJECTOR } from '../config/injector';
@@ -47,38 +47,38 @@ export class MissionsDAL extends BaseDAL<Mission> {
 
 	createMission(mission: Mission): Observable<Mission> {
 		return this.insertOne$(mission)
-			.pipe(map(({ ops }) => ops[0]));
+			.pipe(map((result: InsertOneWriteOpResult<Mission>) => result.ops[0]));
 	}
 
 	updateMission(mission: UpdateableMission): Observable<Mission> {
 		Object.keys(mission).forEach((key: string) => mission[key] === undefined && delete mission[key]);
-		return this.updateMission$(mission._id, { $set: mission })
+		return this.updateMission$(mission._id, { $set: mission }, { returnOriginal: false })
 			.pipe(switchMapTo(this.getMissionById(mission._id)));
 	}
 
 	setExportedMission(missionId: ObjectId, isExported: boolean): Observable<boolean> {
 		return this.updateMission$(missionId, { $set: { isExported } })
-			.pipe(map(({ ok }) => ok === 1));
+			.pipe(map(this.isUpdateOk()));
 	}
 
-	addToJoinRequest(userId: string, missionId: ObjectId): Observable<void> {
+	addToJoinRequest(userId: string, missionId: ObjectId): Observable<boolean> {
 		return this.updateMission$(missionId, { $addToSet: { joinRequests: userId } })
-			.pipe(switchMapTo(of(null)));
+			.pipe(map(this.isUpdateOk()));
 	}
 
-	removeFromJoinRequest(userId: string, missionId: ObjectId): Observable<void> {
+	removeFromJoinRequest(userId: string, missionId: ObjectId): Observable<boolean> {
 		return this.updateMission$(missionId, { $pull: { joinRequests: userId } })
-			.pipe(switchMapTo(null));
+			.pipe(map(this.isUpdateOk()));
 	}
 
-	addUserToMission(user: User, permission: Permission, missionId: ObjectId): Observable<void> {
+	addUserToMission(user: User, permission: Permission, missionId: ObjectId): Observable<boolean> {
 		return this.updateMission$(missionId, { $addToSet: { users: { ...user, permission } }, $pull: { joinRequests: user._id } })
-			.pipe(switchMapTo(null));
+			.pipe(map(this.isUpdateOk()));
 	}
 
-	removeUserFromMission(userId: string, missionId: ObjectId): Observable<void> {
+	removeUserFromMission(userId: string, missionId: ObjectId): Observable<boolean> {
 		return this.updateMission$(missionId, { $pull: { users: { _id: userId } } })
-			.pipe(switchMapTo(of()));
+			.pipe(map(this.isUpdateOk()));
 	}
 
 	private updateMission$(_id: ObjectId, update: UpdateQuery<Mission>, options?: FindOneAndUpdateOption<Mission>): Observable<FindAndModifyWriteOpResultObject<Mission>> {

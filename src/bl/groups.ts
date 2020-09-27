@@ -41,17 +41,17 @@ export class GroupsBL {
 	updateGroup(updatedGroup: UpdateableGroup): Observable<Group> {
 		return this.dal.updateGroup(updatedGroup);
 	}
-	addUser(userId: string, groupId: ObjectId): Observable<void> {
+	addUser(userId: string, groupId: ObjectId): Observable<boolean> {
 		const user: User = getUserById(userId);
 		return this.dal.addUserToGroup(groupId, { ...user, role: Role.MEMBER });
 	}
-	leaveOrRemoveUser(userId: string, groupId: ObjectId): Observable<void> {
+	leaveOrRemoveUser(userId: string, groupId: ObjectId): Observable<boolean> {
 		return this.dal.removeUserFromGroup(groupId, userId);
 	}
-	askJoinGroup(userId: string, groupId: ObjectId): Observable<void> {
+	askJoinGroup(userId: string, groupId: ObjectId): Observable<boolean> {
 		return this.dal.addUserToJoinRequests(groupId, userId);
 	}
-	cancelOrRejectJoinRequest(userId: string, groupId: ObjectId): Observable<void> {
+	cancelOrRejectJoinRequest(userId: string, groupId: ObjectId): Observable<boolean> {
 		return this.dal.removeUserFromJoinRequests(groupId, userId);
 	}
 }

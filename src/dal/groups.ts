@@ -1,9 +1,9 @@
 import { UpdateableGroup } from 'src/models/group';
-import { ObjectId } from 'mongodb';
+import { FindAndModifyWriteOpResultObject, InsertOneWriteOpResult, ObjectId } from 'mongodb';
 import { inject, injectable } from 'inversify';
 import { Logger } from 'winston';
 import { Observable } from 'rxjs';
-import { map, switchMapTo } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 
 import { Group } from '../models/group';
 import { UserWithRole } from '../models/user';
@@ -32,32 +32,32 @@ export class GroupsDAL extends BaseDAL<Group> {
 	}
 
 	createGroup(group: Group): Observable<Group> {
-		return this.insertOne$(group).pipe(map(result => result.ops[0]))
+		return this.insertOne$(group).pipe(map((result: InsertOneWriteOpResult<Group>) => result.ops[0]))
 	}
 
 	updateGroup(group: UpdateableGroup): Observable<Group> {
 		Object.keys(group).forEach((key: string) => group[key] === undefined && delete group[key]);
-		return this.findOneAndUpdate$({ _id: group._id }, { $set: group })
-			.pipe(map(result => result.value));
+		return this.findOneAndUpdate$({ _id: group._id }, { $set: group }, { returnOriginal: false })
+			.pipe(map((result: FindAndModifyWriteOpResultObject<Group>) => result.value));
 	}
 
-	addUserToGroup(groupId: ObjectId, user: UserWithRole): Observable<void> {
+	addUserToGroup(groupId: ObjectId, user: UserWithRole): Observable<boolean> {
 		return this.findOneAndUpdate$({ _id: groupId }, { $addToSet: { users: user }, $pull: { joinRequests: user._id } })
-			.pipe(switchMapTo(null));
+			.pipe(map(this.isUpdateOk()));
 	}
 
-	removeUserFromGroup(groupId: ObjectId, userId: string): Observable<void> {
+	removeUserFromGroup(groupId: ObjectId, userId: string): Observable<boolean> {
 		return this.findOneAndUpdate$({ _id: groupId }, { $pull: { users: { _id: userId } } })
-			.pipe(switchMapTo(null));
+			.pipe(map(this.isUpdateOk()));
 	}
 
-	addUserToJoinRequests(groupId: ObjectId, userId: string): Observable<void> {
+	addUserToJoinRequests(groupId: ObjectId, userId: string): Observable<boolean> {
 		return this.findOneAndUpdate$({ _id: groupId }, { $addToSet: { joinRequests: userId } })
-			.pipe(switchMapTo(null));
+			.pipe(map(this.isUpdateOk()));
 	}
 
-	removeUserFromJoinRequests(groupId: ObjectId, userId: string): Observable<void> {
+	removeUserFromJoinRequests(groupId: ObjectId, userId: string): Observable<boolean> {
 		return this.findOneAndUpdate$({ _id: groupId }, { $pull: { joinRequests: userId } })
-			.pipe(switchMapTo(null));
+			.pipe(map(this.isUpdateOk()));
 	}
 }

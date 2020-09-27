@@ -60,28 +60,28 @@ export class MissionsBL {
 	setExportedMission(missionId: ObjectId, isExported: boolean): Observable<boolean> {
 		return this.dal.setExportedMission(missionId, isExported);
 	}
-	askToJoinToMission(userId: string, missionId: ObjectId): Observable<void> {
+	askToJoinToMission(userId: string, missionId: ObjectId): Observable<boolean> {
 		return this.dal.addToJoinRequest(userId, missionId);
 	}
-	cancelOrDeclineJoinRequest(userId: string, missionId: ObjectId): Observable<void> {
+	cancelOrDeclineJoinRequest(userId: string, missionId: ObjectId): Observable<boolean> {
 		return this.dal.removeFromJoinRequest(userId, missionId);
 	}
-	acceptJoinRequest(userId: string, permission: Permission, missionId: ObjectId): Observable<void> {
+	acceptJoinRequest(userId: string, permission: Permission, missionId: ObjectId): Observable<boolean> {
 		const user: User = getUserById(userId);
 		return this.dal.addUserToMission(user, permission, missionId)
 	}
-	addUserToMission(userId: string, permission: Permission, missionId: ObjectId): Observable<void> {
+	addUserToMission(userId: string, permission: Permission, missionId: ObjectId): Observable<boolean> {
 		const user: User = getUserById(userId);
 		return this.dal.addUserToMission(user, permission, missionId);
 	}
-	changeUserPermission(userId: string, permission: Permission, missionId: ObjectId): Observable<void> {
+	changeUserPermission(userId: string, permission: Permission, missionId: ObjectId): Observable<boolean> {
 		const user: User = getUserById(userId);
 		return merge(
 			this.dal.removeUserFromMission(userId, missionId),
 			this.dal.addUserToMission(user, permission, missionId)
 		);
 	}
-	leaveOrRemoveUserFromMission(userId: string, missionId: ObjectId): Observable<void> {
+	leaveOrRemoveUserFromMission(userId: string, missionId: ObjectId): Observable<boolean> {
 		return this.dal.removeUserFromMission(userId, missionId);
 	}
 }

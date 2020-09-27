@@ -59,6 +59,7 @@ export class MissionsAPI implements API {
 			this.bl.getMissionsByIds(_ids).pipe(take(1)).subscribe({
 				next: (result: Mission[]) => {
 					if (!result || result.length == 0) return next(new NotFoundError(`missions with ids: [${ids.join(', ')}]`))
+					
 					response.send(result);
 				},
 				error: (error: any) => next(error)
@@ -112,7 +113,7 @@ export class MissionsAPI implements API {
 			const _missionId = missionId instanceof ObjectId ? missionId : new ObjectId(missionId);
 			this.bl.setExportedMission(_missionId, true).pipe(take(1)).subscribe({
 				next: (result: boolean) => {
-					if (!result) return next(new ActionFailedError('export mission'));
+					if (!result) return next(new ActionFailedError('exportMission'));
 
 					response.send(result);
 				},
@@ -127,7 +128,7 @@ export class MissionsAPI implements API {
 			const _missionId = missionId instanceof ObjectId ? missionId : new ObjectId(missionId);
 			this.bl.setExportedMission(_missionId, false).pipe(take(1)).subscribe({
 				next: (result: boolean) => {
-					if (!result) return next(new ActionFailedError('unexport mission'));
+					if (!result) return next(new ActionFailedError('unexportMission'));
 
 					response.send(result);
 				},
@@ -142,7 +143,12 @@ export class MissionsAPI implements API {
 
 			const _missionId = missionId instanceof ObjectId ? missionId : new ObjectId(missionId);
 			this.bl.askToJoinToMission(userId, _missionId).pipe(take(1)).subscribe({
-				next: (result: void) => response.send(result), error: (error: any) => next(error)
+				next: (result: boolean) => {
+					if (!result) return next(new ActionFailedError('askToJoinToMission'));
+
+					response.send(result)
+				}, 
+				error: (error: any) => next(error)
 			});
 		});
 
@@ -153,7 +159,12 @@ export class MissionsAPI implements API {
 
 			const _missionId = missionId instanceof ObjectId ? missionId : new ObjectId(missionId);
 			this.bl.cancelOrDeclineJoinRequest(userId, _missionId).pipe(take(1)).subscribe({
-				next: (result: void) => response.send(result), error: (error: any) => next(error)
+				next: (result: boolean) => {
+					if (!result) return next(new ActionFailedError('cancelJoinRequest'));
+
+					response.send(result)
+				}, 
+				error: (error: any) => next(error)
 			});
 		});
 
@@ -165,7 +176,12 @@ export class MissionsAPI implements API {
 
 			const _missionId = missionId instanceof ObjectId ? missionId : new ObjectId(missionId);
 			this.bl.acceptJoinRequest(userId, permission as Permission, _missionId).pipe(take(1)).subscribe({
-				next: (result: void) => response.send(result), error: (error: any) => next(error)
+				next: (result: boolean) => {
+					if (!result) return next(new ActionFailedError('acceptJoinRequest'));
+
+					response.send(result)
+				}, 
+				error: (error: any) => next(error)
 			});
 		});
 
@@ -176,7 +192,12 @@ export class MissionsAPI implements API {
 
 			const _missionId = missionId instanceof ObjectId ? missionId : new ObjectId(missionId);
 			this.bl.cancelOrDeclineJoinRequest(userId, _missionId).pipe(take(1)).subscribe({
-				next: (result: void) => response.send(result), error: (error: any) => next(error)
+				next: (result: boolean) => {
+					if (!result) return next(new ActionFailedError('declineJoinRequest'));
+
+					response.send(result)
+				}, 
+				error: (error: any) => next(error)
 			});
 		});
 
@@ -188,7 +209,12 @@ export class MissionsAPI implements API {
 
 			const _missionId = missionId instanceof ObjectId ? missionId : new ObjectId(missionId);
 			this.bl.addUserToMission(userId, permission as Permission, _missionId).pipe(take(1)).subscribe({
-				next: (result: void) => response.send(result), error: (error: any) => next(error)
+				next: (result: boolean) => {
+					if (!result) return next(new ActionFailedError('addUserToMission'));
+
+					response.send(result)
+				}, 
+				error: (error: any) => next(error)
 			});
 		});
 
@@ -199,7 +225,12 @@ export class MissionsAPI implements API {
 
 			const _missionId = missionId instanceof ObjectId ? missionId : new ObjectId(missionId);
 			this.bl.leaveOrRemoveUserFromMission(userId, _missionId).pipe(take(1)).subscribe({
-				next: (result: void) => response.send(result), error: (error: any) => next(error)
+				next: (result: boolean) => {
+					if (!result) return next(new ActionFailedError('removeUserFromMission'));
+
+					response.send(result)
+				}, 
+				error: (error: any) => next(error)
 			});
 		});
 
@@ -211,7 +242,12 @@ export class MissionsAPI implements API {
 
 			const _missionId = missionId instanceof ObjectId ? missionId : new ObjectId(missionId);
 			this.bl.changeUserPermission(userId, permission as Permission, _missionId).pipe(take(1)).subscribe({
-				next: (result: void) => response.send(result), error: (error: any) => next(error)
+				next: (result: boolean) => {
+					if (!result) return next(new ActionFailedError('changeUserPermission'));
+
+					response.send(result)
+				}, 
+				error: (error: any) => next(error)
 			});
 		});
 
@@ -222,7 +258,12 @@ export class MissionsAPI implements API {
 
 			const _missionId = missionId instanceof ObjectId ? missionId : new ObjectId(missionId);
 			this.bl.leaveOrRemoveUserFromMission(userId, _missionId).pipe(take(1)).subscribe({
-				next: (result: void) => response.send(result), error: (error: any) => next(error)
+				next: (result: boolean) => {
+					if (!result) return next(new ActionFailedError('leaveMission'));
+
+					response.send(result)
+				}, 
+				error: (error: any) => next(error)
 			});
 		});
 	};

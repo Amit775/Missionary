@@ -5,7 +5,7 @@ import { ObjectId } from 'mongodb';
 import { API } from './api';
 import { INJECTOR } from '../config/injector';
 import { GroupsBL } from '../bl/groups';
-import { MissingArgumentError } from '../logger/error';
+import { ActionFailedError, MissingArgumentError } from '../logger/error';
 import { BaseGroup, Group, UpdateableGroup } from '../models/group';
 
 
@@ -72,7 +72,12 @@ export class GroupsAPI implements API {
 
 			const _groupId: ObjectId = groupId instanceof ObjectId ? groupId : new ObjectId(groupId);
 			this.bl.addUser(userId, _groupId).subscribe({
-				next: (result: void) => response.send(result), error: (error: any) => next(error)
+				next: (result: boolean) => {
+					if (!result) return next(new ActionFailedError('addUser'));
+
+					response.send(result);
+				},
+				error: (error: any) => next(error)
 			});
 		});
 
@@ -83,7 +88,12 @@ export class GroupsAPI implements API {
 
 			const _groupId: ObjectId = groupId instanceof ObjectId ? groupId : new ObjectId(groupId);
 			this.bl.leaveOrRemoveUser(userId, _groupId).subscribe({
-				next: (result: void) => response.send(result), error: (error: any) => next(error)
+				next: (result: boolean) => {
+					if (!result) return next(new ActionFailedError('removeUser'));
+
+					response.send(result);
+				},
+				error: (error: any) => next(error)
 			});
 		});
 
@@ -94,7 +104,12 @@ export class GroupsAPI implements API {
 
 			const _groupId: ObjectId = groupId instanceof ObjectId ? groupId : new ObjectId(groupId);
 			this.bl.leaveOrRemoveUser(userId, _groupId).subscribe({
-				next: (result: void) => response.send(result), error: (error: any) => next(error)
+				next: (result: boolean) => {
+					if (!result) return next(new ActionFailedError('leaveGroup'));
+
+					response.send(result);
+				},
+				error: (error: any) => next(error)
 			});
 		});
 
@@ -105,7 +120,12 @@ export class GroupsAPI implements API {
 
 			const _groupId: ObjectId = groupId instanceof ObjectId ? groupId : new ObjectId(groupId);
 			this.bl.askJoinGroup(userId, _groupId).subscribe({
-				next: (result: void) => response.send(result), error: (error: any) => next(error)
+				next: (result: boolean) => {
+					if (!result) return next(new ActionFailedError('askJoinGroup'));
+
+					response.send(result);
+				},
+				error: (error: any) => next(error)
 			});
 		});
 
@@ -116,7 +136,12 @@ export class GroupsAPI implements API {
 
 			const _groupId: ObjectId = groupId instanceof ObjectId ? groupId : new ObjectId(groupId);
 			this.bl.cancelOrRejectJoinRequest(userId, _groupId).subscribe({
-				next: (result: void) => response.send(result), error: (error: any) => next(error)
+				next: (result: boolean) => {
+					if (!result) return next(new ActionFailedError('cancelJoinRequest'));
+
+					response.send(result);
+				},
+				error: (error: any) => next(error)
 			});
 		});
 
@@ -127,7 +152,12 @@ export class GroupsAPI implements API {
 
 			const _groupId: ObjectId = groupId instanceof ObjectId ? groupId : new ObjectId(groupId);
 			this.bl.addUser(userId, _groupId).subscribe({
-				next: (result: void) => response.send(result), error: (error: any) => next(error)
+				next: (result: boolean) => {
+					if (!result) return next(new ActionFailedError('acceptJoinRequest'));
+
+					response.send(result);
+				},
+				error: (error: any) => next(error)
 			});
 		});
 
@@ -138,7 +168,12 @@ export class GroupsAPI implements API {
 
 			const _groupId: ObjectId = groupId instanceof ObjectId ? groupId : new ObjectId(groupId);
 			this.bl.cancelOrRejectJoinRequest(userId, _groupId).subscribe({
-				next: (result: void) => response.send(result), error: (error: any) => next(error)
+				next: (result: boolean) => {
+					if (!result) return next(new ActionFailedError('rejectJoinRequest'));
+
+					response.send(result);
+				},
+				error: (error: any) => next(error)
 			});
 		});
 	}
