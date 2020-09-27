@@ -23,19 +23,19 @@ export class MissionsController implements IController {
 	constructor() {
 		this._router = express.Router();
 
-		this._router.get('/getAllMissions', (request: Request, response: Response, next: NextFunction) => {
+		this.router.get('/getAllMissions', (request: Request, response: Response, next: NextFunction) => {
 			this.bl.getAllMissions().pipe(take(1)).subscribe({
 				next: (result: Mission[]) => response.send(result), error: error => next(error)
 			});
 		});
 
-		this._router.get('/getAllMissionsNames', (request: Request, response: Response, next: NextFunction) => {
+		this.router.get('/getAllMissionsNames', (request: Request, response: Response, next: NextFunction) => {
 			this.bl.getAllMissionsNames().pipe(take(1)).subscribe({
 				next: (result: string[]) => response.send(result), error: error => next(error)
 			});
 		});
 
-		this._router.get('/getMissionById', (request: Request, response: Response, next: NextFunction) => {
+		this.router.get('/getMissionById', (request: Request, response: Response, next: NextFunction) => {
 			const { id } = request.query;
 
 			const _id: ObjectId = id instanceof ObjectId ? id : new ObjectId(id.toString());
@@ -50,7 +50,7 @@ export class MissionsController implements IController {
 		});
 
 		// Todo: check if necessery
-		this._router.post('/getMissionsByIds', (request: Request, response: Response, next: NextFunction) => {
+		this.router.post('/getMissionsByIds', (request: Request, response: Response, next: NextFunction) => {
 			const { ids } = request.body;
 			if (!ids) return next(new MissingArgumentError('ids'));
 			if (!Array.isArray(ids) || ids.length === 0) return next(new InvalidArgumentError('ids', ids));
@@ -65,7 +65,7 @@ export class MissionsController implements IController {
 			});
 		});
 
-		this._router.get('/getPermissionsOfUser', (request: Request, response: Response, next: NextFunction) => {
+		this.router.get('/getPermissionsOfUser', (request: Request, response: Response, next: NextFunction) => {
 			const { userId, missionId } = request.query;
 			if (!userId) return next(new MissingArgumentError('userId'));
 			if (!missionId) return next(new MissingArgumentError('missionId'));
@@ -76,7 +76,7 @@ export class MissionsController implements IController {
 			});
 		});
 
-		this._router.get('/getAllMissionsOfUser', (request: Request, response: Response, next: NextFunction) => {
+		this.router.get('/getAllMissionsOfUser', (request: Request, response: Response, next: NextFunction) => {
 			const { userId } = request.query;
 			if (!userId) return next(new MissingArgumentError('userId'));
 
@@ -85,7 +85,7 @@ export class MissionsController implements IController {
 			});
 		});
 
-		this._router.post('/createMission', (request: Request, response: Response, next: NextFunction) => {
+		this.router.post('/createMission', (request: Request, response: Response, next: NextFunction) => {
 			const newMission: BaseMission = request.body;
 			if (!newMission.name) return next(new MissingArgumentError('name'));
 			if (!newMission.description) return next(new MissingArgumentError('description'));
@@ -95,7 +95,7 @@ export class MissionsController implements IController {
 			});
 		});
 
-		this._router.put('/updateMission', (request: Request, response: Response, next: NextFunction) => {
+		this.router.put('/updateMission', (request: Request, response: Response, next: NextFunction) => {
 			const mission: UpdateableMission = request.body;
 			if (!mission._id) return next(new MissingArgumentError('mission._id'))
 
@@ -105,7 +105,7 @@ export class MissionsController implements IController {
 			});
 		});
 
-		this._router.put('/exportMission', (request: Request, response: Response, next: NextFunction) => {
+		this.router.put('/exportMission', (request: Request, response: Response, next: NextFunction) => {
 			const { missionId } = request.body;
 			if (!missionId) return next(new MissingArgumentError('missionId'));
 
@@ -120,7 +120,7 @@ export class MissionsController implements IController {
 			});
 		});
 
-		this._router.put('/unexportMission', (request: Request, response: Response, next: NextFunction) => {
+		this.router.put('/unexportMission', (request: Request, response: Response, next: NextFunction) => {
 			const { missionId } = request.body;
 			if (!missionId) return next(new MissingArgumentError('missionId'));
 
@@ -135,7 +135,7 @@ export class MissionsController implements IController {
 			});
 		});
 
-		this._router.put('/askToJoinToMission', (request: Request, response: Response, next: NextFunction) => {
+		this.router.put('/askToJoinToMission', (request: Request, response: Response, next: NextFunction) => {
 			const { userId, missionId } = request.body;
 			if (!userId) return next(new MissingArgumentError('userId'));
 			if (!missionId) return next(new MissingArgumentError('missionId'));
@@ -146,7 +146,7 @@ export class MissionsController implements IController {
 			});
 		});
 
-		this._router.put('/cancelJoinRequest', (request: Request, response: Response, next: NextFunction) => {
+		this.router.put('/cancelJoinRequest', (request: Request, response: Response, next: NextFunction) => {
 			const { userId, missionId } = request.body;
 			if (!userId) return next(new MissingArgumentError('userId'));
 			if (!missionId) return next(new MissingArgumentError('missionId'));
@@ -157,7 +157,7 @@ export class MissionsController implements IController {
 			});
 		});
 
-		this._router.put('/acceptJoinRequest', (request: Request, response: Response, next: NextFunction) => {
+		this.router.put('/acceptJoinRequest', (request: Request, response: Response, next: NextFunction) => {
 			const { userId, missionId, permission } = request.body;
 			if (!userId) return next(new MissingArgumentError('userId'));
 			if (!missionId) return next(new MissingArgumentError('missionId'));
@@ -169,7 +169,7 @@ export class MissionsController implements IController {
 			});
 		});
 
-		this._router.put('/declineJoinRequest', (request: Request, response: Response, next: NextFunction) => {
+		this.router.put('/declineJoinRequest', (request: Request, response: Response, next: NextFunction) => {
 			const { userId, missionId } = request.body;
 			if (!userId) return next(new MissingArgumentError('userId'));
 			if (!missionId) return next(new MissingArgumentError('missionId'));
@@ -180,7 +180,7 @@ export class MissionsController implements IController {
 			});
 		});
 
-		this._router.put('/addUserToMission', (request: Request, response: Response, next: NextFunction) => {
+		this.router.put('/addUserToMission', (request: Request, response: Response, next: NextFunction) => {
 			const { userId, missionId, permission } = request.body;
 			if (!userId) return next(new MissingArgumentError('userId'));
 			if (!missionId) return next(new MissingArgumentError('missionId'));
@@ -192,7 +192,7 @@ export class MissionsController implements IController {
 			});
 		});
 
-		this._router.put('/removeUserFromMission', (request: Request, response: Response, next: NextFunction) => {
+		this.router.put('/removeUserFromMission', (request: Request, response: Response, next: NextFunction) => {
 			const { userId, missionId } = request.body;
 			if (!userId) return next(new MissingArgumentError('userId'));
 			if (!missionId) return next(new MissingArgumentError('missionId'));
@@ -203,7 +203,7 @@ export class MissionsController implements IController {
 			});
 		});
 
-		this._router.put('/changeUserPermission', (request: Request, response: Response, next: NextFunction) => {
+		this.router.put('/changeUserPermission', (request: Request, response: Response, next: NextFunction) => {
 			const { userId, missionId, permission } = request.body;
 			if (!userId) return next(new MissingArgumentError('userId'));
 			if (!missionId) return next(new MissingArgumentError('missionId'));
@@ -215,7 +215,7 @@ export class MissionsController implements IController {
 			});
 		});
 
-		this._router.put('/leaveMission', (request: Request, response: Response, next: NextFunction) => {
+		this.router.put('/leaveMission', (request: Request, response: Response, next: NextFunction) => {
 			const { userId, missionId } = request.body;
 			if (!userId) return next(new MissingArgumentError('userId'));
 			if (!missionId) return next(new MissingArgumentError('missionId'));

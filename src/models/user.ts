@@ -1,4 +1,4 @@
-import { Permission } from './permission';
+import { Permission, Role } from './permission';
 
 
 export interface User {
@@ -8,3 +8,4 @@ export interface User {
 }
 
 export type UserWithPermission = User & { permission: Permission };
+export type UserWithRole = User & { role: Role };
