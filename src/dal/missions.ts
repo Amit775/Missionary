@@ -1,8 +1,8 @@
+import { FindAndModifyWriteOpResultObject, FindOneAndUpdateOption, ObjectId, UpdateQuery } from 'mongodb';
+import { injectable, inject } from 'inversify';
+import { Logger } from 'winston';
 import { Observable, of } from 'rxjs';
 import { map, switchMapTo } from 'rxjs/operators';
-import { FindAndModifyWriteOpResultObject, FindOneAndUpdateOption, ObjectId, UpdateQuery } from 'mongodb';
-import { Logger } from 'winston';
-import { injectable, inject } from 'inversify';
 
 import { IConfig, INJECTOR } from '../config/injector';
 import { Mission, UpdateableMission } from '../models/mission';
@@ -51,7 +51,8 @@ export class MissionsDAL extends BaseDAL<Mission> {
 	}
 
 	updateMission(mission: UpdateableMission): Observable<Mission> {
-		return this.updateMission$(mission._id, { $set: { name: mission.name, description: mission.description } })
+		Object.keys(mission).forEach((key: string) => mission[key] === undefined && delete mission[key]);
+		return this.updateMission$(mission._id, { $set: mission })
 			.pipe(switchMapTo(this.getMissionById(mission._id)));
 	}
 
@@ -71,7 +72,7 @@ export class MissionsDAL extends BaseDAL<Mission> {
 	}
 
 	addUserToMission(user: User, permission: Permission, missionId: ObjectId): Observable<void> {
-		return this.updateMission$(missionId, { $addToSet: { users: { ...user, permission } } })
+		return this.updateMission$(missionId, { $addToSet: { users: { ...user, permission } }, $pull: { joinRequests: user._id } })
 			.pipe(switchMapTo(null));
 	}
 

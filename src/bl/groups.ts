@@ -26,11 +26,20 @@ export class GroupsBL {
 	getGroupById(id: ObjectId): Observable<Group> {
 		return this.dal.getGroupById(id);
 	}
-	createGroup(newGroup: BaseGroup): Observable<Group> {
-		throw new Error('Method not implemented.');
+	createGroup(baseGroup: BaseGroup): Observable<Group> {
+		const user: User = getUserById('currentUser');
+		const group: Group = {
+			...baseGroup,
+			_id: null,
+			creator: user,
+			users: [{ ...user, role: Role.ADMIN }],
+			joinRequests: []
+		};
+
+		return this.dal.createGroup(group);
 	}
 	updateGroup(updatedGroup: UpdateableGroup): Observable<Group> {
-		throw new Error('Method not implemented.');
+		return this.dal.updateGroup(updatedGroup);
 	}
 	addUser(userId: string, groupId: ObjectId): Observable<void> {
 		const user: User = getUserById(userId);

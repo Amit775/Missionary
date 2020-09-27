@@ -1,3 +1,4 @@
+import { UpdateableGroup } from 'src/models/group';
 import { ObjectId } from 'mongodb';
 import { inject, injectable } from 'inversify';
 import { Logger } from 'winston';
@@ -32,6 +33,12 @@ export class GroupsDAL extends BaseDAL<Group> {
 
 	createGroup(group: Group): Observable<Group> {
 		return this.insertOne$(group).pipe(map(result => result.ops[0]))
+	}
+
+	updateGroup(group: UpdateableGroup): Observable<Group> {
+		Object.keys(group).forEach((key: string) => group[key] === undefined && delete group[key]);
+		return this.findOneAndUpdate$({ _id: group._id }, { $set: group })
+			.pipe(map(result => result.value));
 	}
 
 	addUserToGroup(groupId: ObjectId, user: UserWithRole): Observable<void> {

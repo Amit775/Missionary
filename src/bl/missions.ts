@@ -68,10 +68,7 @@ export class MissionsBL {
 	}
 	acceptJoinRequest(userId: string, permission: Permission, missionId: ObjectId): Observable<void> {
 		const user: User = getUserById(userId);
-		return merge(
-			this.dal.removeFromJoinRequest(userId, missionId),
-			this.dal.addUserToMission(user, permission, missionId)
-		);
+		return this.dal.addUserToMission(user, permission, missionId)
 	}
 	addUserToMission(userId: string, permission: Permission, missionId: ObjectId): Observable<void> {
 		const user: User = getUserById(userId);
