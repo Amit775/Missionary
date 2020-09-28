@@ -3,7 +3,7 @@ import { injectable, inject } from 'inversify';
 import { ObjectId } from 'mongodb';
 
 import { API } from './api';
-import { INJECTOR } from '../config/injector';
+import { INJECTOR } from '../config/types';
 import { GroupsBL } from '../bl/groups';
 import { ActionFailedError, MissingArgumentError } from '../logger/error';
 import { BaseGroup, Group, UpdateableGroup } from '../models/group';

@@ -2,9 +2,10 @@ import { FindAndModifyWriteOpResultObject, FindOneAndUpdateOption, InsertOneWrit
 import { injectable, inject } from 'inversify';
 import { Logger } from 'winston';
 import { Observable } from 'rxjs';
-import { map, switchMapTo } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 
-import { IConfig, INJECTOR } from '../config/injector';
+import { IConfig } from '../config/injector';
+import { INJECTOR } from '../config/types';
 import { Mission, UpdateableMission } from '../models/mission';
 import { BaseDAL } from './base';
 import { Permission } from '../models/permission';
@@ -53,7 +54,7 @@ export class MissionsDAL extends BaseDAL<Mission> {
 	updateMission(mission: UpdateableMission): Observable<Mission> {
 		Object.keys(mission).forEach((key: string) => mission[key] === undefined && delete mission[key]);
 		return this.updateMission$(mission._id, { $set: mission }, { returnOriginal: false })
-			.pipe(switchMapTo(this.getMissionById(mission._id)));
+			.pipe(map(result => result.value));
 	}
 
 	setExportedMission(missionId: ObjectId, isExported: boolean): Observable<boolean> {

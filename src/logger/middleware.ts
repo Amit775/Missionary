@@ -7,8 +7,8 @@ import { MSError, GeneralError } from './error';
 type LoggerMiddleware = (logger: Logger) => RequestHandler | ErrorRequestHandler;
 
 export const log_request: LoggerMiddleware = (logger: Logger) => (request: Request, response: Response, next: NextFunction) => {
-	const { url, params, query, headers, method, body } = request;
-	logger.log('http', 'income request', { request: { url, params, query, headers, method, body } });
+	const { url, params, query, headers, method, body, cookies } = request;
+	logger.log('http', 'income request', { request: { url, params, query, headers, method, body, cookies } });
 	next()
 };
 

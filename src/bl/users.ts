@@ -1,7 +1,7 @@
 import { injectable, inject } from 'inversify';
 
 import { UsersDAL } from '../dal/users';
-import { INJECTOR } from '../config/injector';
+import { INJECTOR } from '../config/types';
 
 
 @injectable()

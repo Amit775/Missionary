@@ -22,7 +22,7 @@ export abstract class BaseDAL<T extends { _id?: any }> {
 
 	constructor(
 		@unmanaged() private config: IConfig,
-		@unmanaged() protected logger: Logger,
+		@unmanaged() private logger: Logger,
 		name: string
 	) {
 		new MongoClient(this.config.db.uri, { useNewUrlParser: true, useUnifiedTopology: true })

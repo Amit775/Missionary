@@ -1,4 +1,4 @@
-import { UpdateableGroup } from 'src/models/group';
+import { UpdateableGroup } from '../models/group';
 import { FindAndModifyWriteOpResultObject, InsertOneWriteOpResult, ObjectId } from 'mongodb';
 import { inject, injectable } from 'inversify';
 import { Logger } from 'winston';
@@ -7,7 +7,8 @@ import { map } from 'rxjs/operators';
 
 import { Group } from '../models/group';
 import { UserWithRole } from '../models/user';
-import { IConfig, INJECTOR } from '../config/injector';
+import { IConfig } from '../config/injector';
+import { INJECTOR } from '../config/types';
 import { BaseDAL } from './base';
 
 

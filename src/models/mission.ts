@@ -19,4 +19,4 @@ export interface Mission {
 }
 
 export type BaseMission = Pick<Mission, 'name' | 'description'>
-export type UpdateableMission = Pick<Mission, '_id'> & Partial<BaseMission>;
+export type UpdateableMission = ({ id?: string } & { _id?: ObjectId }) & Partial<BaseMission>;

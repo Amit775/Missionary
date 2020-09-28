@@ -15,22 +15,10 @@ import { MonitorAPI } from '../api/monitor';
 import { MissionsAPI } from '../api/missions';
 import { logger } from '../logger/logger';
 import { default as config } from './config.json';
+import { INJECTOR } from './types';
 
 
 export type IConfig = typeof config;
-
-export const INJECTOR: { [key: string]: symbol } = {
-	Application: Symbol('Application'),
-	UsersBL: Symbol('IUsersBL'),
-	UsersDAL: Symbol('IUsersDAL'),
-	GroupsBL: Symbol('IGroupsBL'),
-	GroupsDAL: Symbol('IGroupsDAL'),
-	MissionsBL: Symbol('IMissionsBL'),
-	MissionsDAL: Symbol('IMissionsDAL'),
-	APIS: Symbol('API'),
-	Logger: Symbol('Logger'),
-	Config: Symbol('IConfig'),
-}
 
 export const Injector = new Container();
 Injector.bind<Application>(INJECTOR.Application).to(Application).inSingletonScope();

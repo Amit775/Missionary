@@ -1,5 +1,7 @@
+import { Permission, Role } from '../models/permission';
+
 export class MSError extends Error {
-	type: 'MSError' = 'MSError';
+	readonly type: 'MSError' = 'MSError';
 
 	constructor(
 		public name: string,
@@ -60,6 +62,36 @@ export class ActionFailedError extends MSError {
 			`ActionFailedError`,
 			550,
 			`The action '${actionName}' couldn't be performed successfully, try again.`
+		)
+	}
+}
+
+export class MissingTokenError extends MSError {
+	constructor() {
+		super(
+			`MissingTokenEroor`,
+			401,
+			`cannot find access token in cookie named 'token'`
+		)
+	}
+}
+
+export class InvalidTokenError extends MSError {
+	constructor(error: Error) {
+		super(
+			`InvalidTokenError`,
+			401,
+			error.message
+		)
+	}
+}
+
+export class ForbiddenError extends MSError {
+	constructor(actionName: string, userPrivelege: string, desiredPrivelege: string) {
+		super(
+			`ForbiddenError`,
+			403,
+			`the action '${actionName}' need '${desiredPrivelege}' privelege, but user has only '${userPrivelege}' privelege`
 		)
 	}
 }

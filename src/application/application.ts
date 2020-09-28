@@ -1,18 +1,23 @@
-import { default as express, Request, Response, NextFunction, Express } from 'express';
+import { default as express, Request, Response, NextFunction, Express, json, urlencoded } from 'express';
 import { multiInject, inject, injectable } from 'inversify';
-import { urlencoded, json } from 'body-parser';
+import { default as cookieParser } from 'cookie-parser';
 import { Logger } from 'winston';
 import { default as cors } from 'cors'
 
-import { INJECTOR } from '../config/injector';
 import { log_request, log_response, log_error, catch_error } from '../logger/middleware';
 import { API } from '../api/api';
+import { INJECTOR } from '../config/types';
+import { dals } from '../logger/auth';
+import { GroupsDAL } from './../dal/groups';
+import { MissionsDAL } from './../dal/missions';
 
 
 @injectable()
 export class Application {
 	@multiInject(INJECTOR.APIS) private apis: API[]
 	@inject(INJECTOR.Logger) private logger: Logger;
+	@inject(INJECTOR.MissionsDAL) private missionsDAL: MissionsDAL;
+	@inject(INJECTOR.GroupsDAL) private groupsDal: GroupsDAL;
 
 	private application: Express;
 
@@ -25,7 +30,8 @@ export class Application {
 		this.application = express()
 			.use(cors())
 			.use(json(), urlencoded({ extended: true }))
-			.use(log_request(this.logger), log_response(this.logger));
+			.use(cookieParser())
+			.use(log_request(this.logger), log_response(this.logger), dals(this.missionsDAL, this.groupsDal));
 
 		this.apis.forEach(api => this.application.use(api.prefix, api.router));
 

@@ -2,7 +2,7 @@ import { merge, Observable } from 'rxjs';
 import { injectable, inject } from 'inversify';
 import { ObjectId } from 'mongodb';
 
-import { INJECTOR } from '../config/injector';
+import { INJECTOR } from '../config/types';
 import { MissionsDAL } from '../dal/missions';
 import { Permission } from '../models/permission';
 import { Mission, BaseMission, UpdateableMission } from '../models/mission';
@@ -36,9 +36,7 @@ export class MissionsBL {
 	getAllMissionsNames(): Observable<string[]> {
 		return this.dal.getAllMissionsNames();
 	}
-	createMission(baseMission: BaseMission): Observable<Mission> {
-		const user: User = getUserById('currentUser');
-
+	createMission(baseMission: BaseMission, user: User): Observable<Mission> {
 		const mission: Mission = {
 			...baseMission,
 			_id: null,
@@ -65,10 +63,6 @@ export class MissionsBL {
 	}
 	cancelOrDeclineJoinRequest(userId: string, missionId: ObjectId): Observable<boolean> {
 		return this.dal.removeFromJoinRequest(userId, missionId);
-	}
-	acceptJoinRequest(userId: string, permission: Permission, missionId: ObjectId): Observable<boolean> {
-		const user: User = getUserById(userId);
-		return this.dal.addUserToMission(user, permission, missionId)
 	}
 	addUserToMission(userId: string, permission: Permission, missionId: ObjectId): Observable<boolean> {
 		const user: User = getUserById(userId);

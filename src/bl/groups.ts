@@ -3,7 +3,7 @@ import { ObjectId } from 'mongodb';
 import { Observable } from 'rxjs';
 
 import { GroupsDAL } from '../dal/groups';
-import { INJECTOR } from '../config/injector';
+import { INJECTOR } from '../config/types';
 import { User } from '../models/user';
 import { UpdateableGroup, BaseGroup, Group } from '../models/group';
 import { Role } from '../models/permission';
