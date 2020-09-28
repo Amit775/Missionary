@@ -2,13 +2,15 @@ import { Logger } from 'winston';
 import { NextFunction, Request, Response, RequestHandler, ErrorRequestHandler } from 'express';
 
 import { MSError, GeneralError } from './error';
+import { User } from '../models/user';
 
 
 type LoggerMiddleware = (logger: Logger) => RequestHandler | ErrorRequestHandler;
 
 export const log_request: LoggerMiddleware = (logger: Logger) => (request: Request, response: Response, next: NextFunction) => {
 	const { url, params, query, headers, method, body, cookies } = request;
-	logger.log('http', 'income request', { request: { url, params, query, headers, method, body, cookies } });
+	const user: User = response.locals.currentUser;
+	logger.log('http', 'income request', { request: { url, params, query, headers, method, body, cookies, user } });
 	next()
 };
 
@@ -27,7 +29,8 @@ export const log_response: LoggerMiddleware = (logger: Logger) => (request: Requ
 		}
 		const body: string = Buffer.concat(chunks).toString('utf8');
 		const { statusCode, statusMessage } = response;
-		logger.log('http', 'outcome response', { response: { statusCode, statusMessage, body } });
+		const user: User = response.locals.currentUser;
+		logger.log('http', 'outcome response', { response: { statusCode, statusMessage, body, user } });
 		oldEnd.apply(response, arguments);
 	};
 
@@ -44,10 +47,11 @@ export const catch_error: ErrorRequestHandler = (error: MSError | any, request: 
 export const log_error: LoggerMiddleware = (logger: Logger) => (error: MSError, request: Request, response: Response, next: NextFunction) => {
 	if (response.headersSent) return next(error);
 
+	const user: User = response.locals.currentUser;
 	const { name, message, stack, statusCode } = error;
 	const errorMessage = `${name}: ${message}`;
 
-	logger.log('error', errorMessage, { stack });
+	logger.log('error', errorMessage, { stack, user });
 
 	response.status(statusCode).send(errorMessage);
 }
