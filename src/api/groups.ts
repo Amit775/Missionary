@@ -6,7 +6,7 @@ import { API } from './api';
 import { INJECTOR } from '../config/types';
 import { GroupsBL } from '../bl/groups';
 import { ActionFailedError, MissingArgumentError } from '../logger/error';
-import { BaseGroup, Group, UpdateableGroup } from '../models/group';
+import { BaseGroup, Group } from '../models/group';
 import { User } from '../models/user';
 import { Role } from '../models/permission';
 import { gauthorization } from '../logger/auth';
@@ -103,9 +103,9 @@ export class GroupsAPI implements API {
 
 		this.router.put('/updateGroup/:id', gauthorization(Role.ADMIN), (request: Request, response: Response, next: NextFunction) => {
 			const groupId = new ObjectId(request.params.id);
-			const { name, description }: UpdateableGroup = request.body;
+			const { name, description }: BaseGroup = request.body;
 
-			this.bl.updateGroup({ _id: groupId, name, description }).subscribe({
+			this.bl.updateGroup(groupId, { name, description }).subscribe({
 				next: (result: Group) => response.send(result), error: (error: any) => next(error)
 			});
 		});

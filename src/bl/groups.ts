@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 import { GroupsDAL } from '../dal/groups';
 import { INJECTOR } from '../config/types';
 import { User } from '../models/user';
-import { UpdateableGroup, BaseGroup, Group } from '../models/group';
+import { BaseGroup, Group } from '../models/group';
 import { Role } from '../models/permission';
 
 
@@ -37,8 +37,8 @@ export class GroupsBL {
 
 		return this.dal.createGroup(group);
 	}
-	updateGroup(updatedGroup: UpdateableGroup): Observable<Group> {
-		return this.dal.updateGroup(updatedGroup);
+	updateGroup(groupdId: ObjectId, baseGroup: BaseGroup): Observable<Group> {
+		return this.dal.updateGroup(groupdId, baseGroup);
 	}
 	addUser(userId: string, groupId: ObjectId): Observable<boolean> {
 		const user: User = getUserById(userId);

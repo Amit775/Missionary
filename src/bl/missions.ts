@@ -5,7 +5,7 @@ import { ObjectId } from 'mongodb';
 import { INJECTOR } from '../config/types';
 import { MissionsDAL } from '../dal/missions';
 import { Permission } from '../models/permission';
-import { Mission, BaseMission, UpdateableMission } from '../models/mission';
+import { Mission, BaseMission } from '../models/mission';
 import { State } from '../models/state';
 import { User } from '../models/user';
 
@@ -51,8 +51,8 @@ export class MissionsBL {
 
 		return this.dal.createMission(mission);
 	}
-	updateMission(mission: UpdateableMission): Observable<Mission> {
-		return this.dal.updateMission(mission);
+	updateMission(missionId: ObjectId, baseMission: BaseMission): Observable<Mission> {
+		return this.dal.updateMission(missionId, baseMission);
 	}
 	setExportedMission(missionId: ObjectId, isExported: boolean): Observable<boolean> {
 		return this.dal.setExportedMission(missionId, isExported);

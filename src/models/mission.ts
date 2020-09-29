@@ -4,10 +4,13 @@ import { User, UserWithPermission } from './user';
 import { State } from './state';
 
 
-export interface Mission {
-	_id: ObjectId;
+export interface BaseMission {
 	name: string;
 	description: string;
+}
+
+export interface Mission extends BaseMission {
+	_id: ObjectId;
 	users: UserWithPermission[];
 	creator: User;
 	createdTime: Date;
@@ -17,6 +20,3 @@ export interface Mission {
 	sequence: number;
 	isExported: boolean;
 }
-
-export type BaseMission = Pick<Mission, 'name' | 'description'>
-export type UpdateableMission = ({ id?: string } & { _id?: ObjectId }) & Partial<BaseMission>;

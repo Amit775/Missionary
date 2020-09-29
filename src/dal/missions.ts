@@ -6,7 +6,7 @@ import { map } from 'rxjs/operators';
 
 import { IConfig } from '../config/injector';
 import { INJECTOR } from '../config/types';
-import { Mission, UpdateableMission } from '../models/mission';
+import { BaseMission, Mission } from '../models/mission';
 import { BaseDAL } from './base';
 import { Permission } from '../models/permission';
 import { User } from '../models/user';
@@ -51,10 +51,10 @@ export class MissionsDAL extends BaseDAL<Mission> {
 			.pipe(map((result: InsertOneWriteOpResult<Mission>) => result.ops[0]));
 	}
 
-	updateMission(mission: UpdateableMission): Observable<Mission> {
-		Object.keys(mission).forEach((key: string) => mission[key] === undefined && delete mission[key]);
-		return this.updateMission$(mission._id, { $set: mission }, { returnOriginal: false })
-			.pipe(map(result => result.value));
+	updateMission(missionId: ObjectId, baseMission: BaseMission): Observable<Mission> {
+		Object.keys(baseMission).forEach((key: string) => baseMission[key] === undefined && delete baseMission[key]);
+		return this.updateMission$(missionId, { $set: baseMission }, { returnOriginal: false })
+			.pipe(map((result: FindAndModifyWriteOpResultObject<Mission>) => result.value));
 	}
 
 	setExportedMission(missionId: ObjectId, isExported: boolean): Observable<boolean> {

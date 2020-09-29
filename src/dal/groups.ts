@@ -1,4 +1,4 @@
-import { UpdateableGroup } from '../models/group';
+import { BaseGroup } from '../models/group';
 import { FindAndModifyWriteOpResultObject, InsertOneWriteOpResult, ObjectId } from 'mongodb';
 import { inject, injectable } from 'inversify';
 import { Logger } from 'winston';
@@ -36,9 +36,9 @@ export class GroupsDAL extends BaseDAL<Group> {
 		return this.insertOne$(group).pipe(map((result: InsertOneWriteOpResult<Group>) => result.ops[0]))
 	}
 
-	updateGroup(group: UpdateableGroup): Observable<Group> {
-		Object.keys(group).forEach((key: string) => group[key] === undefined && delete group[key]);
-		return this.findOneAndUpdate$({ _id: group._id }, { $set: group }, { returnOriginal: false })
+	updateGroup(groupdId: ObjectId, baseGroup: BaseGroup): Observable<Group> {
+		Object.keys(baseGroup).forEach((key: string) => baseGroup[key] === undefined && delete baseGroup[key]);
+		return this.findOneAndUpdate$({ _id: groupdId }, { $set: baseGroup }, { returnOriginal: false })
 			.pipe(map((result: FindAndModifyWriteOpResultObject<Group>) => result.value));
 	}
 

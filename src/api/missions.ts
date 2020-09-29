@@ -4,7 +4,7 @@ import { inject, injectable } from 'inversify';
 import { take } from 'rxjs/operators';
 import { ObjectId } from 'mongodb';
 
-import { Mission, BaseMission, UpdateableMission } from '../models/mission';
+import { Mission, BaseMission } from '../models/mission';
 import { INJECTOR } from '../config/types';
 import { MissionsBL } from '../bl/missions';
 import { API } from './api';
@@ -146,9 +146,9 @@ export class MissionsAPI implements API {
 		this.router.put('/updateMission/:id', authorization(Permission.WRITE), (request: Request, response: Response, next: NextFunction) => {
 			const missionId: ObjectId = new ObjectId(request.params.id);
 
-			const { name, description }: UpdateableMission = request.body;
+			const { name, description }: BaseMission = request.body;
 
-			this.bl.updateMission({ _id: missionId, name, description }).pipe(take(1)).subscribe({
+			this.bl.updateMission(missionId, { name, description }).pipe(take(1)).subscribe({
 				next: (result: Mission) => response.send(result), error: (error: any) => next(error)
 			});
 		});
