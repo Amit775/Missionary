@@ -118,7 +118,7 @@ export class MissionsAPI implements API {
 			const missionId: ObjectId = new ObjectId(request.params.id);
 			const currentUser: User = response.locals.currentUser;
 
-			this.bl.cancelOrDeclineJoinRequest(currentUser._id, missionId).pipe(take(1)).subscribe({
+			this.bl.cancelOrRejectJoinRequest(currentUser._id, missionId).pipe(take(1)).subscribe({
 				next: (result: boolean) => {
 					if (!result) return next(new ActionFailedError('cancelJoinRequest'));
 
@@ -197,15 +197,15 @@ export class MissionsAPI implements API {
 			});
 		});
 
-		this.router.put('/declineJoinRequest/:id', authorization(Permission.ADMIN), (request: Request, response: Response, next: NextFunction) => {
+		this.router.put('/rejectJoinRequest/:id', authorization(Permission.ADMIN), (request: Request, response: Response, next: NextFunction) => {
 			const missionId: ObjectId = new ObjectId(request.params.id);
 
 			const { userId } = request.body;
 			if (!userId) return next(new MissingArgumentError('userId'));
 
-			this.bl.cancelOrDeclineJoinRequest(userId, missionId).pipe(take(1)).subscribe({
+			this.bl.cancelOrRejectJoinRequest(userId, missionId).pipe(take(1)).subscribe({
 				next: (result: boolean) => {
-					if (!result) return next(new ActionFailedError('declineJoinRequest'));
+					if (!result) return next(new ActionFailedError('rejectJoinRequest'));
 
 					response.send(result)
 				},

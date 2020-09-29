@@ -1,2 +1,2 @@
-export enum Permission { READ, WRITE, ADMIN, SUPERADMIN }
-export enum Role { MEMBER, ADMIN, SUPERADMIN }
+export enum Permission { READ, WRITE, ADMIN }
+export enum Role { MEMBER, ADMIN }

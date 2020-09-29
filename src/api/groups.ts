@@ -49,11 +49,11 @@ export class GroupsAPI implements API {
 		this.router.post('/createGroup', (request: Request, response: Response, next: NextFunction) => {
 			const currentUser: User = response.locals.currentUser;
 
-			const newGroup: BaseGroup = request.body;
-			if (!newGroup.name) return next(new MissingArgumentError('name'));
-			if (!newGroup.description) return next(new MissingArgumentError('description'));
+			const { name, description }: BaseGroup = request.body;
+			if (!name) return next(new MissingArgumentError('name'));
+			if (!description) return next(new MissingArgumentError('description'));
 
-			this.bl.createGroup(newGroup, currentUser).subscribe({
+			this.bl.createGroup({ name, description }, currentUser).subscribe({
 				next: (result: Group) => response.send(result), error: (error: any) => next(error)
 			});
 		});
@@ -114,6 +114,8 @@ export class GroupsAPI implements API {
 			const groupId = new ObjectId(request.params.id);
 			const { userId } = request.body;
 
+			if (!userId) return next(new MissingArgumentError('userId'));
+
 			this.bl.addUser(userId, groupId).subscribe({
 				next: (result: boolean) => {
 					if (!result) return next(new ActionFailedError('addUser'));
@@ -127,6 +129,8 @@ export class GroupsAPI implements API {
 		this.router.put('/removeUser/:id', gauthorization(Role.ADMIN), (request: Request, response: Response, next: NextFunction) => {
 			const groupId = new ObjectId(request.params.id);
 			const { userId } = request.body;
+
+			if (!userId) return next(new MissingArgumentError('userId'));
 
 			this.bl.leaveOrRemoveUser(userId, groupId).subscribe({
 				next: (result: boolean) => {
@@ -142,6 +146,8 @@ export class GroupsAPI implements API {
 			const groupId = new ObjectId(request.params.id);
 			const { userId } = request.body;
 
+			if (!userId) return next(new MissingArgumentError('userId'));
+
 			this.bl.addUser(userId, groupId).subscribe({
 				next: (result: boolean) => {
 					if (!result) return next(new ActionFailedError('acceptJoinRequest'));
@@ -155,6 +161,8 @@ export class GroupsAPI implements API {
 		this.router.put('/rejectJoinRequest/:id', gauthorization(Role.ADMIN), (request: Request, response: Response, next: NextFunction) => {
 			const groupId = new ObjectId(request.params.id);
 			const { userId } = request.body;
+
+			if (!userId) return next(new MissingArgumentError('userId'));
 
 			this.bl.cancelOrRejectJoinRequest(userId, groupId).subscribe({
 				next: (result: boolean) => {

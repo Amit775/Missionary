@@ -60,7 +60,7 @@ export class MissionsBL {
 	askToJoinToMission(userId: string, missionId: ObjectId): Observable<boolean> {
 		return this.dal.addToJoinRequest(userId, missionId);
 	}
-	cancelOrDeclineJoinRequest(userId: string, missionId: ObjectId): Observable<boolean> {
+	cancelOrRejectJoinRequest(userId: string, missionId: ObjectId): Observable<boolean> {
 		return this.dal.removeFromJoinRequest(userId, missionId);
 	}
 	addUserToMission(userId: string, permission: Permission, missionId: ObjectId): Observable<boolean> {
