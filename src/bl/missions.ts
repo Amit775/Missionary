@@ -9,7 +9,6 @@ import { Mission, BaseMission, UpdateableMission } from '../models/mission';
 import { State } from '../models/state';
 import { User } from '../models/user';
 
-
 function getUserById(userId: string): User {
 	return { _id: userId, name: 'some name', hierarchy: 'some/hierarchy' };
 }
@@ -36,18 +35,18 @@ export class MissionsBL {
 	getAllMissionsNames(): Observable<string[]> {
 		return this.dal.getAllMissionsNames();
 	}
-	createMission(baseMission: BaseMission, user: User): Observable<Mission> {
+	createMission(baseMission: BaseMission, currentUser: User): Observable<Mission> {
 		const mission: Mission = {
 			...baseMission,
 			_id: null,
 			createdTime: new Date(),
 			updatedTime: new Date(),
-			creator: user,
+			creator: currentUser,
 			isExported: false,
 			joinRequests: [],
 			sequence: 'getMaxSequence'.length,
 			state: State.CREATED,
-			users: [{ ...user, permission: Permission.ADMIN }]
+			users: [{ ...currentUser, permission: Permission.ADMIN }]
 		}
 
 		return this.dal.createMission(mission);

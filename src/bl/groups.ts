@@ -26,13 +26,12 @@ export class GroupsBL {
 	getGroupById(id: ObjectId): Observable<Group> {
 		return this.dal.getGroupById(id);
 	}
-	createGroup(baseGroup: BaseGroup): Observable<Group> {
-		const user: User = getUserById('currentUser');
+	createGroup(baseGroup: BaseGroup, currentUser: User): Observable<Group> {
 		const group: Group = {
 			...baseGroup,
 			_id: null,
-			creator: user,
-			users: [{ ...user, role: Role.ADMIN }],
+			creator: currentUser,
+			users: [{ ...currentUser, role: Role.ADMIN }],
 			joinRequests: []
 		};
 

@@ -7,6 +7,9 @@ import { INJECTOR } from '../config/types';
 import { GroupsBL } from '../bl/groups';
 import { ActionFailedError, MissingArgumentError } from '../logger/error';
 import { BaseGroup, Group, UpdateableGroup } from '../models/group';
+import { User } from '../models/user';
+import { Role } from '../models/permission';
+import { gauthorization } from '../logger/auth';
 
 
 @injectable()
@@ -28,98 +31,38 @@ export class GroupsAPI implements API {
 		});
 
 		this.router.get('/getGroupsOfUser', (request: Request, response: Response, next: NextFunction) => {
-			const { userId } = request.query;
-			if (!userId) return next(new MissingArgumentError('userId'));
+			const currentUser: User = response.locals.currentUser;
 
-			this.bl.getGroupsOfUser(userId.toString()).subscribe({
+			this.bl.getGroupsOfUser(currentUser._id).subscribe({
 				next: (result: Group[]) => response.send(result), error: (error: any) => next(error)
 			});
 		});
 
-		this.router.get('/getGroupById', (request: Request, response: Response, next: NextFunction) => {
-			const { id } = request.query;
-			if (!id) return next(new MissingArgumentError('id'));
+		this.router.get('/getGroupById/:id', (request: Request, response: Response, next: NextFunction) => {
+			const groupId: ObjectId = new ObjectId(request.params.id);
 
-			const _id: ObjectId = id instanceof ObjectId ? id : new ObjectId(id.toString());
-			this.bl.getGroupById(_id).subscribe({
+			this.bl.getGroupById(groupId).subscribe({
 				next: (result: Group) => response.send(result), error: (error: any) => next(error)
 			});
 		});
 
 		this.router.post('/createGroup', (request: Request, response: Response, next: NextFunction) => {
+			const currentUser: User = response.locals.currentUser;
+
 			const newGroup: BaseGroup = request.body;
 			if (!newGroup.name) return next(new MissingArgumentError('name'));
 			if (!newGroup.description) return next(new MissingArgumentError('description'));
 
-			this.bl.createGroup(newGroup).subscribe({
+			this.bl.createGroup(newGroup, currentUser).subscribe({
 				next: (result: Group) => response.send(result), error: (error: any) => next(error)
 			});
 		});
 
-		this.router.put('/updateGroup', (request: Request, response: Response, next: NextFunction) => {
-			const updatedGroup: UpdateableGroup = request.body;
-			if (!updatedGroup._id) return next(new MissingArgumentError('_id'));
+		this.router.put('/askJoinGroup/:id', (request: Request, response: Response, next: NextFunction) => {
+			const groupId = new ObjectId(request.params.id);
+			const currentUser: User = response.locals.currentUser;
 
-			this.bl.updateGroup(updatedGroup).subscribe({
-				next: (result: Group) => response.send(result), error: (error: any) => next(error)
-			});
-		});
-
-		this.router.put('/addUser', (request: Request, response: Response, next: NextFunction) => {
-			const { userId, groupId } = request.body;
-			if (!userId) return next(new MissingArgumentError('userId'));
-			if (!groupId) return next(new MissingArgumentError('groupId'));
-
-			const _groupId: ObjectId = groupId instanceof ObjectId ? groupId : new ObjectId(groupId);
-			this.bl.addUser(userId, _groupId).subscribe({
-				next: (result: boolean) => {
-					if (!result) return next(new ActionFailedError('addUser'));
-
-					response.send(result);
-				},
-				error: (error: any) => next(error)
-			});
-		});
-
-		this.router.put('/removeUser', (request: Request, response: Response, next: NextFunction) => {
-			const { userId, groupId } = request.body;
-			if (!userId) return next(new MissingArgumentError('userId'));
-			if (!groupId) return next(new MissingArgumentError('groupId'));
-
-			const _groupId: ObjectId = groupId instanceof ObjectId ? groupId : new ObjectId(groupId);
-			this.bl.leaveOrRemoveUser(userId, _groupId).subscribe({
-				next: (result: boolean) => {
-					if (!result) return next(new ActionFailedError('removeUser'));
-
-					response.send(result);
-				},
-				error: (error: any) => next(error)
-			});
-		});
-
-		this.router.put('/leaveGroup', (request: Request, response: Response, next: NextFunction) => {
-			const { userId, groupId } = request.body;
-			if (!userId) return next(new MissingArgumentError('userId'));
-			if (!groupId) return next(new MissingArgumentError('groupId'));
-
-			const _groupId: ObjectId = groupId instanceof ObjectId ? groupId : new ObjectId(groupId);
-			this.bl.leaveOrRemoveUser(userId, _groupId).subscribe({
-				next: (result: boolean) => {
-					if (!result) return next(new ActionFailedError('leaveGroup'));
-
-					response.send(result);
-				},
-				error: (error: any) => next(error)
-			});
-		});
-
-		this.router.put('/askJoinGroup', (request: Request, response: Response, next: NextFunction) => {
-			const { userId, groupId } = request.body;
-			if (!userId) return next(new MissingArgumentError('userId'));
-			if (!groupId) return next(new MissingArgumentError('groupId'));
-
-			const _groupId: ObjectId = groupId instanceof ObjectId ? groupId : new ObjectId(groupId);
-			this.bl.askJoinGroup(userId, _groupId).subscribe({
+			this.bl.askJoinGroup(currentUser._id, groupId).subscribe({
 				next: (result: boolean) => {
 					if (!result) return next(new ActionFailedError('askJoinGroup'));
 
@@ -129,13 +72,11 @@ export class GroupsAPI implements API {
 			});
 		});
 
-		this.router.put('/cancelJoinRequest', (request: Request, response: Response, next: NextFunction) => {
-			const { userId, groupId } = request.body;
-			if (!userId) return next(new MissingArgumentError('userId'));
-			if (!groupId) return next(new MissingArgumentError('groupId'));
+		this.router.put('/cancelJoinRequest/:id', (request: Request, response: Response, next: NextFunction) => {
+			const groupId = new ObjectId(request.params.id);
+			const currentUser: User = response.locals.currentUser;
 
-			const _groupId: ObjectId = groupId instanceof ObjectId ? groupId : new ObjectId(groupId);
-			this.bl.cancelOrRejectJoinRequest(userId, _groupId).subscribe({
+			this.bl.cancelOrRejectJoinRequest(currentUser._id, groupId).subscribe({
 				next: (result: boolean) => {
 					if (!result) return next(new ActionFailedError('cancelJoinRequest'));
 
@@ -145,13 +86,63 @@ export class GroupsAPI implements API {
 			});
 		});
 
-		this.router.put('/acceptJoinRequest', (request: Request, response: Response, next: NextFunction) => {
-			const { userId, groupId } = request.body;
-			if (!userId) return next(new MissingArgumentError('userId'));
-			if (!groupId) return next(new MissingArgumentError('groupId'));
+		this.router.put('/leaveGroup/:id', (request: Request, response: Response, next: NextFunction) => {
+			const groupId: ObjectId = new ObjectId(request.params.id);
+			const currentUser: User = response.locals.currentUser;
 
-			const _groupId: ObjectId = groupId instanceof ObjectId ? groupId : new ObjectId(groupId);
-			this.bl.addUser(userId, _groupId).subscribe({
+			this.bl.leaveOrRemoveUser(currentUser._id, groupId).subscribe({
+				next: (result: boolean) => {
+					if (!result) return next(new ActionFailedError('leaveGroup'));
+
+					response.send(result);
+				},
+				error: (error: any) => next(error)
+			});
+		});
+
+
+		this.router.put('/updateGroup/:id', gauthorization(Role.ADMIN), (request: Request, response: Response, next: NextFunction) => {
+			const groupId = new ObjectId(request.params.id);
+			const { name, description }: UpdateableGroup = request.body;
+
+			this.bl.updateGroup({ _id: groupId, name, description }).subscribe({
+				next: (result: Group) => response.send(result), error: (error: any) => next(error)
+			});
+		});
+
+		this.router.put('/addUser/:id', gauthorization(Role.ADMIN), (request: Request, response: Response, next: NextFunction) => {
+			const groupId = new ObjectId(request.params.id);
+			const { userId } = request.body;
+
+			this.bl.addUser(userId, groupId).subscribe({
+				next: (result: boolean) => {
+					if (!result) return next(new ActionFailedError('addUser'));
+
+					response.send(result);
+				},
+				error: (error: any) => next(error)
+			});
+		});
+
+		this.router.put('/removeUser/:id', gauthorization(Role.ADMIN), (request: Request, response: Response, next: NextFunction) => {
+			const groupId = new ObjectId(request.params.id);
+			const { userId } = request.body;
+
+			this.bl.leaveOrRemoveUser(userId, groupId).subscribe({
+				next: (result: boolean) => {
+					if (!result) return next(new ActionFailedError('removeUser'));
+
+					response.send(result);
+				},
+				error: (error: any) => next(error)
+			});
+		});
+
+		this.router.put('/acceptJoinRequest/:id', gauthorization(Role.ADMIN), (request: Request, response: Response, next: NextFunction) => {
+			const groupId = new ObjectId(request.params.id);
+			const { userId } = request.body;
+
+			this.bl.addUser(userId, groupId).subscribe({
 				next: (result: boolean) => {
 					if (!result) return next(new ActionFailedError('acceptJoinRequest'));
 
@@ -161,13 +152,11 @@ export class GroupsAPI implements API {
 			});
 		});
 
-		this.router.put('/rejectJoinRequest', (request: Request, response: Response, next: NextFunction) => {
-			const { userId, groupId } = request.body;
-			if (!userId) return next(new MissingArgumentError('userId'));
-			if (!groupId) return next(new MissingArgumentError('groupId'));
+		this.router.put('/rejectJoinRequest/:id', gauthorization(Role.ADMIN), (request: Request, response: Response, next: NextFunction) => {
+			const groupId = new ObjectId(request.params.id);
+			const { userId } = request.body;
 
-			const _groupId: ObjectId = groupId instanceof ObjectId ? groupId : new ObjectId(groupId);
-			this.bl.cancelOrRejectJoinRequest(userId, _groupId).subscribe({
+			this.bl.cancelOrRejectJoinRequest(userId, groupId).subscribe({
 				next: (result: boolean) => {
 					if (!result) return next(new ActionFailedError('rejectJoinRequest'));
 

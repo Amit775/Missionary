@@ -102,9 +102,9 @@ export class MissionsAPI implements API {
 
 		this.router.put('/askToJoinToMission/:id', (request: Request, response: Response, next: NextFunction) => {
 			const missionId: ObjectId = new ObjectId(request.params.id);
-			const user: User = response.locals.currentUser;
+			const currentUser: User = response.locals.currentUser;
 
-			this.bl.askToJoinToMission(user._id, missionId).pipe(take(1)).subscribe({
+			this.bl.askToJoinToMission(currentUser._id, missionId).pipe(take(1)).subscribe({
 				next: (result: boolean) => {
 					if (!result) return next(new ActionFailedError('askToJoinToMission'));
 
@@ -116,9 +116,9 @@ export class MissionsAPI implements API {
 
 		this.router.put('/cancelJoinRequest/:id', (request: Request, response: Response, next: NextFunction) => {
 			const missionId: ObjectId = new ObjectId(request.params.id);
-			const user: User = response.locals.currentUser;
+			const currentUser: User = response.locals.currentUser;
 
-			this.bl.cancelOrDeclineJoinRequest(user._id, missionId).pipe(take(1)).subscribe({
+			this.bl.cancelOrDeclineJoinRequest(currentUser._id, missionId).pipe(take(1)).subscribe({
 				next: (result: boolean) => {
 					if (!result) return next(new ActionFailedError('cancelJoinRequest'));
 
@@ -130,8 +130,9 @@ export class MissionsAPI implements API {
 
 		this.router.put('/leaveMission/:id', (request: Request, response: Response, next: NextFunction) => {
 			const missionId: ObjectId = new ObjectId(request.params.id);
+			const currentUser: User = response.locals.currentUser;
 
-			this.bl.leaveOrRemoveUserFromMission(response.locals.currentUser._id, missionId).pipe(take(1)).subscribe({
+			this.bl.leaveOrRemoveUserFromMission(currentUser._id, missionId).pipe(take(1)).subscribe({
 				next: (result: boolean) => {
 					if (!result) return next(new ActionFailedError('leaveMission'));
 
