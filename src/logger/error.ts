@@ -20,22 +20,23 @@ export class NotFoundError extends MSError {
 	}
 }
 
+
 export class MissingArgumentError extends MSError {
 	constructor(public argumentName: string) {
 		super(
 			`MissingArgumentError`,
 			460,
-			`The argument '${argumentName}' is missing.`
+			`The argument '${argumentName.toString()}' is missing.`
 		);
 	}
 }
 
-export class InvalidArgumentError extends MSError {
-	constructor(public argumentName: string, public argumentValue: string) {
+export class InvalidArgumentError<T> extends MSError {
+	constructor(public argumentName: string, public argumentValue: T) {
 		super(
 			`InvalidArgumentError`,
 			461,
-			`The argument '${argumentName}' with value '${argumentValue}' is invalid.`
+			`The argument '${argumentName.toString()}' with value '${argumentValue}' is invalid.`
 		)
 	}
 }

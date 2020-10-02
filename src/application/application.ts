@@ -7,7 +7,7 @@ import { default as cors } from 'cors'
 import { log_request, log_response, log_error, catch_error } from '../logger/middleware';
 import { API } from '../api/api';
 import { INJECTOR } from '../config/types';
-import { dals } from '../logger/auth';
+import { setDALs } from '../logger/auth';
 import { GroupsDAL } from './../dal/groups';
 import { MissionsDAL } from './../dal/missions';
 
@@ -31,7 +31,7 @@ export class Application {
 			.use(cors())
 			.use(json(), urlencoded({ extended: true }))
 			.use(cookieParser())
-			.use(log_request(this.logger), log_response(this.logger), dals(this.missionsDAL, this.groupsDal));
+			.use(log_request(this.logger), log_response(this.logger), setDALs(this.missionsDAL, this.groupsDal));
 
 		this.apis.forEach(api => this.application.use(api.prefix, api.router));
 

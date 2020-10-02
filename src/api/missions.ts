@@ -1,17 +1,21 @@
-import { User } from './../models/user';
 import { default as express, Router, Request, Response, NextFunction } from 'express';
 import { inject, injectable } from 'inversify';
 import { take } from 'rxjs/operators';
 import { ObjectId } from 'mongodb';
 
+import { API } from './api';
 import { Mission, BaseMission } from '../models/mission';
 import { INJECTOR } from '../config/types';
 import { MissionsBL } from '../bl/missions';
-import { API } from './api';
+import { User } from '../models/user';
 import { MissingArgumentError, InvalidArgumentError, NotFoundError, ActionFailedError } from '../logger/error';
 import { Permission } from '../models/permission';
 import { authentication, authorization } from '../logger/auth';
+import { TRequest, validation } from '../utils/validation';
 
+
+interface UserId { userId: string };
+interface UserIdWithPermission extends UserId { permission: Permission };
 
 @injectable()
 export class MissionsAPI implements API {
@@ -26,241 +30,281 @@ export class MissionsAPI implements API {
 		this._router = express.Router();
 		this.router.use(authentication());
 
-		this.router.get('/getAllMissions', (request: Request, response: Response, next: NextFunction) => {
-			this.bl.getAllMissions().pipe(take(1)).subscribe({
-				next: (result: Mission[]) => response.send(result), error: (error: any) => next(error)
-			});
-		});
+		this.router.get('/getAllMissions',
+			(request: Request, response: Response, next: NextFunction) => {
+				this.bl.getAllMissions().pipe(take(1)).subscribe({
+					next: (result: Mission[]) => response.send(result), error: (error: any) => next(error)
+				});
+			}
+		);
 
-		this.router.get('/getAllMissionsNames', (request: Request, response: Response, next: NextFunction) => {
-			this.bl.getAllMissionsNames().pipe(take(1)).subscribe({
-				next: (result: string[]) => response.send(result), error: (error: any) => next(error)
-			});
-		});
+		this.router.get('/getAllMissionsNames',
+			(request: Request, response: Response, next: NextFunction) => {
+				this.bl.getAllMissionsNames().pipe(take(1)).subscribe({
+					next: (result: string[]) => response.send(result), error: (error: any) => next(error)
+				});
+			}
+		);
 
-		this.router.get('/getMissionById/:id', (request: Request, response: Response, next: NextFunction) => {
-			const missionId: ObjectId = new ObjectId(request.params.id);
+		this.router.get('/getMissionById/:id',
+			(request: Request, response: Response, next: NextFunction) => {
+				const missionId: ObjectId = new ObjectId(request.params.id);
 
-			this.bl.getMissionById(missionId).pipe(take(1)).subscribe({
-				next: (result: Mission) => {
-					if (!result) return next(new NotFoundError(`mission with id: ${missionId.toHexString()}`));
+				this.bl.getMissionById(missionId).pipe(take(1)).subscribe({
+					next: (result: Mission) => {
+						if (!result) return next(new NotFoundError(`mission with id: ${missionId.toHexString()}`));
 
-					response.send(result);
-				},
-				error: (error: any) => next(error)
-			});
-		});
-
-		// Todo: check if necessery
-		this.router.post('/getMissionsByIds', (request: Request, response: Response, next: NextFunction) => {
-			const { ids } = request.body;
-			if (!ids) return next(new MissingArgumentError('ids'));
-			if (!Array.isArray(ids) || ids.length === 0) return next(new InvalidArgumentError('ids', ids));
-
-			const _ids: ObjectId[] = ids.map((id: string | ObjectId) => id instanceof ObjectId ? id : new ObjectId(id));
-			this.bl.getMissionsByIds(_ids).pipe(take(1)).subscribe({
-				next: (result: Mission[]) => {
-					if (!result || result.length == 0) return next(new NotFoundError(`missions with ids: [${ids.join(', ')}]`))
-
-					response.send(result);
-				},
-				error: (error: any) => next(error)
-			});
-		});
+						response.send(result);
+					},
+					error: (error: any) => next(error)
+				});
+			}
+		);
 
 		// Todo: check if necessery
-		this.router.get('/getPermissionsOfUser', (request: Request, response: Response, next: NextFunction) => {
-			const { userId, missionId } = request.query;
-			if (!userId) return next(new MissingArgumentError('userId'));
-			if (!missionId) return next(new MissingArgumentError('missionId'));
+		this.router.post('/getMissionsByIds',
+			validation<{ ids: string[] }>([{ name: 'ids', type: 'object' }]),
+			(request: TRequest<{ ids: string[] }>, response: Response, next: NextFunction) => {
+				const ids: string[] = request.body.ids;
 
-			const _missionId = missionId instanceof ObjectId ? missionId : new ObjectId(missionId.toString());
-			this.bl.getPermissionsOfUser(userId.toString(), _missionId).pipe(take(1)).subscribe({
-				next: (result: Permission) => response.send(`${result}`), error: (error: any) => next(error)
-			});
-		});
+				if (!Array.isArray(ids) || ids.length === 0) return next(new InvalidArgumentError('ids', ids));
 
-		this.router.get('/getAllMissionsOfUser', (request: Request, response: Response, next: NextFunction) => {
-			const currentUser: User = response.locals.currentUser;
+				const _ids: ObjectId[] = ids.map((id: string | ObjectId) => id instanceof ObjectId ? id : new ObjectId(id));
+				this.bl.getMissionsByIds(_ids).pipe(take(1)).subscribe({
+					next: (result: Mission[]) => {
+						if (!result || result.length == 0)
+							return next(new NotFoundError(`missions with ids: [${ids.join(', ')}]`))
 
-			this.bl.getAllMissionsOfUser(currentUser._id).pipe(take(1)).subscribe({
-				next: (result: Mission[]) => response.send(result), error: (error: any) => next(error)
-			});
-		});
+						response.send(result);
+					},
+					error: (error: any) => next(error)
+				});
+			}
+		);
 
-		this.router.post('/createMission', (request: Request, response: Response, next: NextFunction) => {
-			const currentUser: User = response.locals.currentUser;
+		// Todo: check if necessery
+		// Todo: validate query
+		this.router.get('/getPermissionsOfUser',
+			(request: Request, response: Response, next: NextFunction) => {
+				const { userId, missionId } = request.query;
+				if (!userId) return next(new MissingArgumentError('userId'));
+				if (!missionId) return next(new MissingArgumentError('missionId'));
 
-			const { name, description }: BaseMission = request.body;
-			if (!name) return next(new MissingArgumentError('name'));
-			if (!description) return next(new MissingArgumentError('description'));
+				const _missionId = missionId instanceof ObjectId ? missionId : new ObjectId(missionId.toString());
+				this.bl.getPermissionsOfUser(userId.toString(), _missionId).pipe(take(1)).subscribe({
+					next: (result: Permission) => response.send(`${result}`), error: (error: any) => next(error)
+				});
+			}
+		);
 
-			this.bl.createMission({ name, description }, currentUser).pipe(take(1)).subscribe({
-				next: (result: Mission) => response.send(result), error: (error: any) => next(error)
-			});
-		});
+		this.router.get('/getAllMissionsOfUser',
+			(request: Request, response: Response, next: NextFunction) => {
+				const currentUser: User = response.locals.currentUser;
 
-		this.router.put('/askToJoinToMission/:id', (request: Request, response: Response, next: NextFunction) => {
-			const missionId: ObjectId = new ObjectId(request.params.id);
-			const currentUser: User = response.locals.currentUser;
+				this.bl.getAllMissionsOfUser(currentUser._id).pipe(take(1)).subscribe({
+					next: (result: Mission[]) => response.send(result), error: (error: any) => next(error)
+				});
+			}
+		);
 
-			this.bl.askToJoinToMission(currentUser._id, missionId).pipe(take(1)).subscribe({
-				next: (result: boolean) => {
-					if (!result) return next(new ActionFailedError('askToJoinToMission'));
+		this.router.post('/createMission',
+			validation<BaseMission>(['name', 'description']),
+			(request: TRequest<BaseMission>, response: Response, next: NextFunction) => {
+				const currentUser: User = response.locals.currentUser;
 
-					response.send(result)
-				},
-				error: (error: any) => next(error)
-			});
-		});
+				let baseMission: BaseMission = request.body;
 
-		this.router.put('/cancelJoinRequest/:id', (request: Request, response: Response, next: NextFunction) => {
-			const missionId: ObjectId = new ObjectId(request.params.id);
-			const currentUser: User = response.locals.currentUser;
+				this.bl.createMission(baseMission, currentUser).pipe(take(1)).subscribe({
+					next: (result: Mission) => response.send(result), error: (error: any) => next(error)
+				});
+			}
+		);
 
-			this.bl.cancelOrRejectJoinRequest(currentUser._id, missionId).pipe(take(1)).subscribe({
-				next: (result: boolean) => {
-					if (!result) return next(new ActionFailedError('cancelJoinRequest'));
+		this.router.put('/askToJoinToMission/:id',
+			(request: Request, response: Response, next: NextFunction) => {
+				const missionId: ObjectId = new ObjectId(request.params.id);
+				const currentUser: User = response.locals.currentUser;
 
-					response.send(result)
-				},
-				error: (error: any) => next(error)
-			});
-		});
+				this.bl.askToJoinToMission(currentUser._id, missionId).pipe(take(1)).subscribe({
+					next: (result: boolean) => {
+						if (!result) return next(new ActionFailedError('askToJoinToMission'));
 
-		this.router.put('/leaveMission/:id', (request: Request, response: Response, next: NextFunction) => {
-			const missionId: ObjectId = new ObjectId(request.params.id);
-			const currentUser: User = response.locals.currentUser;
+						response.send(result)
+					},
+					error: (error: any) => next(error)
+				});
+			}
+		);
 
-			this.bl.leaveOrRemoveUserFromMission(currentUser._id, missionId).pipe(take(1)).subscribe({
-				next: (result: boolean) => {
-					if (!result) return next(new ActionFailedError('leaveMission'));
+		this.router.put('/cancelJoinRequest/:id',
+			(request: Request, response: Response, next: NextFunction) => {
+				const missionId: ObjectId = new ObjectId(request.params.id);
+				const currentUser: User = response.locals.currentUser;
 
-					response.send(result)
-				},
-				error: (error: any) => next(error)
-			});
-		});
+				this.bl.cancelOrRejectJoinRequest(currentUser._id, missionId).pipe(take(1)).subscribe({
+					next: (result: boolean) => {
+						if (!result) return next(new ActionFailedError('cancelJoinRequest'));
 
+						response.send(result)
+					},
+					error: (error: any) => next(error)
+				});
+			}
+		);
 
-		this.router.put('/updateMission/:id', authorization(Permission.WRITE), (request: Request, response: Response, next: NextFunction) => {
-			const missionId: ObjectId = new ObjectId(request.params.id);
+		this.router.put('/leaveMission/:id',
+			(request: Request, response: Response, next: NextFunction) => {
+				const missionId: ObjectId = new ObjectId(request.params.id);
+				const currentUser: User = response.locals.currentUser;
 
-			const { name, description }: BaseMission = request.body;
+				this.bl.leaveOrRemoveUserFromMission(currentUser._id, missionId).pipe(take(1)).subscribe({
+					next: (result: boolean) => {
+						if (!result) return next(new ActionFailedError('leaveMission'));
 
-			this.bl.updateMission(missionId, { name, description }).pipe(take(1)).subscribe({
-				next: (result: Mission) => response.send(result), error: (error: any) => next(error)
-			});
-		});
-
-		this.router.put('/exportMission/:id', authorization(Permission.WRITE), (request: Request, response: Response, next: NextFunction) => {
-			const missionId: ObjectId = new ObjectId(request.params.id);
-
-			this.bl.setExportedMission(missionId, true).pipe(take(1)).subscribe({
-				next: (result: boolean) => {
-					if (!result) return next(new ActionFailedError('exportMission'));
-
-					response.send(result);
-				},
-				error: (error: any) => next(error)
-			});
-		});
-
-		this.router.put('/unexportMission/:id', authorization(Permission.WRITE), (request: Request, response: Response, next: NextFunction) => {
-			const missionId: ObjectId = new ObjectId(request.params.id);
-
-			this.bl.setExportedMission(missionId, false).pipe(take(1)).subscribe({
-				next: (result: boolean) => {
-					if (!result) return next(new ActionFailedError('unexportMission'));
-
-					response.send(result);
-				},
-				error: (error: any) => next(error)
-			});
-		});
+						response.send(result)
+					},
+					error: (error: any) => next(error)
+				});
+			}
+		);
 
 
-		this.router.put('/acceptJoinRequest/:id', authorization(Permission.ADMIN), (request: Request, response: Response, next: NextFunction) => {
-			const missionId: ObjectId = new ObjectId(request.params.id);
+		this.router.put('/updateMission/:id',
+			authorization(Permission.WRITE),
+			validation<BaseMission>(['name', 'description'], false),
+			(request: TRequest<BaseMission>, response: Response, next: NextFunction) => {
+				const missionId: ObjectId = new ObjectId(request.params.id);
 
-			const { userId, permission } = request.body;
-			if (!userId) return next(new MissingArgumentError('userId'));
-			if (permission == null) return next(new MissingArgumentError('permission'))
+				const baseMission: BaseMission = request.body;
 
-			this.bl.addUserToMission(userId, permission as Permission, missionId).pipe(take(1)).subscribe({
-				next: (result: boolean) => {
-					if (!result) return next(new ActionFailedError('acceptJoinRequest'));
+				this.bl.updateMission(missionId, baseMission).pipe(take(1)).subscribe({
+					next: (result: Mission) => response.send(result), error: (error: any) => next(error)
+				});
 
-					response.send(result)
-				},
-				error: (error: any) => next(error)
-			});
-		});
+			}
+		);
 
-		this.router.put('/rejectJoinRequest/:id', authorization(Permission.ADMIN), (request: Request, response: Response, next: NextFunction) => {
-			const missionId: ObjectId = new ObjectId(request.params.id);
+		this.router.put('/exportMission/:id',
+			authorization(Permission.WRITE),
+			(request: Request, response: Response, next: NextFunction) => {
+				const missionId: ObjectId = new ObjectId(request.params.id);
 
-			const { userId } = request.body;
-			if (!userId) return next(new MissingArgumentError('userId'));
+				this.bl.setExportedMission(missionId, true).pipe(take(1)).subscribe({
+					next: (result: boolean) => {
+						if (!result) return next(new ActionFailedError('exportMission'));
 
-			this.bl.cancelOrRejectJoinRequest(userId, missionId).pipe(take(1)).subscribe({
-				next: (result: boolean) => {
-					if (!result) return next(new ActionFailedError('rejectJoinRequest'));
+						response.send(result);
+					},
+					error: (error: any) => next(error)
+				});
+			}
+		);
 
-					response.send(result)
-				},
-				error: (error: any) => next(error)
-			});
-		});
+		this.router.put('/unexportMission/:id',
+			authorization(Permission.WRITE),
+			(request: Request, response: Response, next: NextFunction) => {
+				const missionId: ObjectId = new ObjectId(request.params.id);
 
-		this.router.put('/addUserToMission/:id', authorization(Permission.ADMIN), (request: Request, response: Response, next: NextFunction) => {
-			const missionId: ObjectId = new ObjectId(request.params.id);
+				this.bl.setExportedMission(missionId, false).pipe(take(1)).subscribe({
+					next: (result: boolean) => {
+						if (!result) return next(new ActionFailedError('unexportMission'));
 
-			const { userId, permission } = request.body;
-			if (!userId) return next(new MissingArgumentError('userId'));
-			if (permission == null) return next(new MissingArgumentError('permission'))
+						response.send(result);
+					},
+					error: (error: any) => next(error)
+				});
+			}
+		);
 
-			this.bl.addUserToMission(userId, permission as Permission, missionId).pipe(take(1)).subscribe({
-				next: (result: boolean) => {
-					if (!result) return next(new ActionFailedError('addUserToMission'));
 
-					response.send(result)
-				},
-				error: (error: any) => next(error)
-			});
-		});
+		this.router.put('/acceptJoinRequest/:id',
+			validation<UserIdWithPermission>(['userId', { name: 'permission', type: Permission }]),
+			authorization(Permission.ADMIN),
+			(request: Request, response: Response, next: NextFunction) => {
+				const missionId: ObjectId = new ObjectId(request.params.id);
+				const { userId, permission }: UserIdWithPermission = request.body;
 
-		this.router.put('/removeUserFromMission/:id', authorization(Permission.ADMIN), (request: Request, response: Response, next: NextFunction) => {
-			const missionId: ObjectId = new ObjectId(request.params.id);
+				this.bl.addUserToMission(userId, permission, missionId).pipe(take(1)).subscribe({
+					next: (result: boolean) => {
+						if (!result) return next(new ActionFailedError('acceptJoinRequest'));
 
-			const { userId } = request.body;
-			if (!userId) return next(new MissingArgumentError('userId'));
+						response.send(result)
+					},
+					error: (error: any) => next(error)
+				});
+			}
+		);
 
-			this.bl.leaveOrRemoveUserFromMission(userId, missionId).pipe(take(1)).subscribe({
-				next: (result: boolean) => {
-					if (!result) return next(new ActionFailedError('removeUserFromMission'));
+		this.router.put('/rejectJoinRequest/:id',
+			validation<UserId>(['userId']),
+			authorization(Permission.ADMIN),
+			(request: Request, response: Response, next: NextFunction) => {
+				const missionId: ObjectId = new ObjectId(request.params.id);
+				const { userId }: UserId = request.body;
 
-					response.send(result)
-				},
-				error: (error: any) => next(error)
-			});
-		});
+				this.bl.cancelOrRejectJoinRequest(userId, missionId).pipe(take(1)).subscribe({
+					next: (result: boolean) => {
+						if (!result) return next(new ActionFailedError('rejectJoinRequest'));
 
-		this.router.put('/changeUserPermission/:id', authorization(Permission.ADMIN), (request: Request, response: Response, next: NextFunction) => {
-			const missionId: ObjectId = new ObjectId(request.params.id);
-			const { userId, permission } = request.body;
+						response.send(result)
+					},
+					error: (error: any) => next(error)
+				});
+			}
+		);
 
-			if (!userId) return next(new MissingArgumentError('userId'));
-			if (permission == null) return next(new MissingArgumentError('permission'))
+		this.router.put('/addUserToMission/:id',
+			validation<UserIdWithPermission>(['userId', { name: 'permission', type: Permission }]),
+			authorization(Permission.ADMIN),
+			(request: Request, response: Response, next: NextFunction) => {
+				const missionId: ObjectId = new ObjectId(request.params.id);
+				const { userId, permission }: UserIdWithPermission = request.body;
 
-			this.bl.changeUserPermission(userId, permission as Permission, missionId).pipe(take(1)).subscribe({
-				next: (result: boolean) => {
-					if (!result) return next(new ActionFailedError('changeUserPermission'));
+				this.bl.addUserToMission(userId, permission, missionId).pipe(take(1)).subscribe({
+					next: (result: boolean) => {
+						if (!result) return next(new ActionFailedError('addUserToMission'));
 
-					response.send(result)
-				},
-				error: (error: any) => next(error)
-			});
-		});
+						response.send(result)
+					},
+					error: (error: any) => next(error)
+				});
+			}
+		);
+
+		this.router.put('/removeUserFromMission/:id',
+			validation<UserId>(['userId']),
+			authorization(Permission.ADMIN),
+			(request: Request, response: Response, next: NextFunction) => {
+				const missionId: ObjectId = new ObjectId(request.params.id);
+				const { userId }: UserId = request.body;
+
+				this.bl.leaveOrRemoveUserFromMission(userId, missionId).pipe(take(1)).subscribe({
+					next: (result: boolean) => {
+						if (!result) return next(new ActionFailedError('removeUserFromMission'));
+
+						response.send(result)
+					},
+					error: (error: any) => next(error)
+				});
+			}
+		);
+
+		this.router.put('/changeUserPermission/:id',
+			validation<UserIdWithPermission>(['userId', { name: 'permission', type: 'number' }]),
+			authorization(Permission.ADMIN),
+			(request: TRequest<UserIdWithPermission>, response: Response, next: NextFunction) => {
+				const missionId: ObjectId = new ObjectId(request.params.id);
+				const { userId, permission }: UserIdWithPermission = request.body;
+
+				this.bl.changeUserPermission(userId, permission, missionId).pipe(take(1)).subscribe({
+					next: (result: boolean) => {
+						if (!result) return next(new ActionFailedError('changeUserPermission'));
+
+						response.send(result)
+					},
+					error: (error: any) => next(error)
+				});
+			}
+		);
 	};
 }
