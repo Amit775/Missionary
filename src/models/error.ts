@@ -19,7 +19,7 @@ export class NotFoundError extends MSError {
 }
 
 export class MissingArgumentError extends MSError {
-	constructor(public argumentName: string) {
+	constructor(argumentName: string) {
 		super(
 			`MissingArgumentError`,
 			460,
@@ -29,12 +29,22 @@ export class MissingArgumentError extends MSError {
 }
 
 export class InvalidArgumentError<T> extends MSError {
-	constructor(public argumentName: string, public argumentValue: T) {
+	constructor(argumentName: string, argumentValue: T) {
 		super(
 			`InvalidArgumentError`,
 			461,
 			`The argument '${argumentName.toString()}' with value '${argumentValue}' is invalid.`
 		)
+	}
+}
+
+export class ArgumentTypeError extends MSError {
+	constructor(argumentName: string, argumentType: string, expectedType: string) {
+		super(
+			`ArgumentTypeError`,
+			462,
+			`The argument '${argumentName}' expected to be with type '${expectedType}', but its actually with type '${argumentType}'`
+		);
 	}
 }
 

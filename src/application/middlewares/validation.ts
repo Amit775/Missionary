@@ -1,6 +1,6 @@
 import { NextFunction, Request, RequestHandler, Response } from 'express';
 
-import { MissingArgumentError, InvalidArgumentError } from '../../models/error';
+import { MissingArgumentError, ArgumentTypeError } from '../../models/error';
 
 type Name<T> = Extract<keyof T, string>;
 
@@ -30,9 +30,9 @@ export function validation<T>(args: (Name<T> | Argument<T>)[], allRequired?: boo
 			if (value == null && (allRequired || required))
 				return next(new MissingArgumentError(name));
 			if (value != null && typeof type === 'object' && (typeof value !== 'number' || typeof value !== 'string') && !Object.keys(type).includes(`${value}`))
-				return next(new InvalidArgumentError(name, value));
+				return next(new ArgumentTypeError(name, typeof value, Object.getPrototypeOf(type)));
 			if (value != null && typeof type !== 'object' && typeof value !== type)
-				return next(new InvalidArgumentError(name, value));
+				return next(new ArgumentTypeError(name, typeof value, type));
 		}
 
 		next();

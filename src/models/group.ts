@@ -7,6 +7,7 @@ export interface BaseGroup {
 	name: string;
 	description: string;
 }
+
 export interface Group {
 	_id: ObjectId;
 	creator: string;
