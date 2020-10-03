@@ -4,14 +4,9 @@ import { Observable } from 'rxjs';
 
 import { GroupsDAL } from '../dal/groups';
 import { INJECTOR } from '../config/types';
-import { User } from '../models/user';
 import { BaseGroup, Group } from '../models/group';
 import { Role } from '../models/permission';
 
-
-function getUserById(userId: string): User {
-	return { _id: userId, name: 'somename', hierarchy: 'some/hierarchy' };
-}
 
 @injectable()
 export class GroupsBL {
@@ -26,12 +21,12 @@ export class GroupsBL {
 	getGroupById(id: ObjectId): Observable<Group> {
 		return this.dal.getGroupById(id);
 	}
-	createGroup(baseGroup: BaseGroup, currentUser: User): Observable<Group> {
+	createGroup(baseGroup: BaseGroup, currentUserId: string): Observable<Group> {
 		const group: Group = {
 			...baseGroup,
 			_id: null,
-			creator: currentUser,
-			users: [{ ...currentUser, role: Role.ADMIN }],
+			creator: currentUserId,
+			users: [{ _id: currentUserId, role: Role.ADMIN }],
 			joinRequests: []
 		};
 
@@ -41,8 +36,7 @@ export class GroupsBL {
 		return this.dal.updateGroup(groupdId, baseGroup);
 	}
 	addUser(userId: string, groupId: ObjectId): Observable<boolean> {
-		const user: User = getUserById(userId);
-		return this.dal.addUserToGroup(groupId, { ...user, role: Role.MEMBER });
+		return this.dal.addUserToGroup(groupId, { _id: userId, role: Role.MEMBER });
 	}
 	leaveOrRemoveUser(userId: string, groupId: ObjectId): Observable<boolean> {
 		return this.dal.removeUserFromGroup(groupId, userId);

@@ -1,6 +1,6 @@
 import { ObjectId } from 'mongodb';
 
-import { User, UserWithPermission } from './user';
+import { UserWithPermission } from './user';
 import { State } from './state';
 
 
@@ -12,7 +12,7 @@ export interface BaseMission {
 export interface Mission extends BaseMission {
 	_id: ObjectId;
 	users: UserWithPermission[];
-	creator: User;
+	creator: string;
 	createdTime: Date;
 	updatedTime: Date;
 	joinRequests: string[];

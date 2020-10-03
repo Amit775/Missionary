@@ -1,6 +1,6 @@
 import { ObjectId } from 'mongodb';
 
-import { User, UserWithRole } from './user';
+import { UserWithRole } from './user';
 
 
 export interface BaseGroup {
@@ -9,7 +9,7 @@ export interface BaseGroup {
 }
 export interface Group {
 	_id: ObjectId;
-	creator: User;
+	creator: string;
 	users: UserWithRole[];
 	joinRequests: string[];
 }

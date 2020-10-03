@@ -4,12 +4,11 @@ import { Logger } from 'winston';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
+import { BaseDAL } from './base';
 import { IConfig } from '../config/injector';
 import { INJECTOR } from '../config/types';
 import { BaseMission, Mission } from '../models/mission';
-import { BaseDAL } from './base';
 import { Permission } from '../models/permission';
-import { User } from '../models/user';
 import { State } from '../models/state';
 
 
@@ -72,8 +71,8 @@ export class MissionsDAL extends BaseDAL<Mission> {
 			.pipe(map(this.isUpdateOk()));
 	}
 
-	addUserToMission(user: User, permission: Permission, missionId: ObjectId): Observable<boolean> {
-		return this.updateMission$(missionId, { $addToSet: { users: { ...user, permission } }, $pull: { joinRequests: user._id } })
+	addUserToMission(userId: string, permission: Permission, missionId: ObjectId): Observable<boolean> {
+		return this.updateMission$(missionId, { $addToSet: { users: { _id: userId, permission } }, $pull: { joinRequests: userId } })
 			.pipe(map(this.isUpdateOk()));
 	}
 

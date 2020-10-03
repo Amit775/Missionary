@@ -4,7 +4,7 @@ import { sign } from 'jsonwebtoken';
 
 import { API } from './api';
 import { privateKey } from '../config/keys';
-import { User } from '../models/user';
+import { UserClaim } from '../models/user';
 
 
 const test = () => true;
@@ -22,8 +22,8 @@ export class MonitorAPI implements API {
 			.get('/isFunctioning', (request: Request, response: Response, next: NextFunction) => response.send(test()))
 			.get('/token', (req, res) => {
 				const isS: boolean = req.query.p.toString() === 'true';
-				const lame: User = { _id: 'LameUser', name: 'Lame User', hierarchy: 'lame/user' };
-				const superu: User = { _id: 'SuperUser', name: 'Super User', hierarchy: 'super/user' };
+				const lame: UserClaim = { _id: 'LameUser', name: 'Lame User', hierarchy: 'lame/user' };
+				const superu: UserClaim = { _id: 'SuperUser', name: 'Super User', hierarchy: 'super/user' };
 				const token = sign(isS ? superu : lame, privateKey, { expiresIn: '1h', algorithm: 'RS512' });
 				res.cookie('token', token, { maxAge: 3600000 }).send();
 			});

@@ -4,11 +4,10 @@ import { verify } from 'jsonwebtoken';
 import { of, throwError } from 'rxjs';
 import { switchMap, take } from 'rxjs/operators';
 
-import { User } from '../../models/user';
 import { publicKey } from '../../config/keys';
 import { Permission, Role } from '../../models/permission';
 import { MissionsDAL } from '../../dal/missions';
-import { UserWithPermission, UserWithRole } from '../../models/user';
+import { UserClaim, UserWithPermission, UserWithRole } from '../../models/user';
 import { ForbiddenError, InvalidTokenError, MissingTokenError, NotFoundError } from '../../models/error';
 import { Mission } from '../../models/mission';
 import { GroupsDAL } from '../../dal/groups';
@@ -21,8 +20,7 @@ export function authentication(): RequestHandler {
 		if (!token) return next(new MissingTokenError());
 
 		try {
-			const { _id, name, hierarchy }: User = verify(token, publicKey, { algorithms: ['RS512'] }) as User;
-			response.locals.currentUser = { _id, name, hierarchy };
+			response.locals.currentUser = verify(token, publicKey, { algorithms: ['RS512'] }) as UserClaim;
 		} catch (error: any) {
 			return next(new InvalidTokenError(error));
 		}
@@ -37,10 +35,10 @@ export function setDALs(missions: MissionsDAL, groups: GroupsDAL): RequestHandle
 	}
 }
 
-export function authorization(desiredPermission: Permission): RequestHandler {
+export function authPermission(desiredPermission: Permission): RequestHandler {
 	return (request: Request, response: Response, next: NextFunction) => {
 		const missionId: string = request.params.id;
-		const currentUser: User = response.locals.currentUser;
+		const currentUser: UserClaim = response.locals.currentUser;
 
 		const missionsDAL: MissionsDAL = response.locals.dals.missions;
 		missionsDAL.getMissionById(new ObjectId(missionId)).pipe(
@@ -65,10 +63,10 @@ export function authorization(desiredPermission: Permission): RequestHandler {
 	}
 }
 
-export function gauthorization(desiredRole: Role): RequestHandler {
+export function authRole(desiredRole: Role): RequestHandler {
 	return (request: Request, response: Response, next: NextFunction) => {
 		const groupId: string = request.params.id;
-		const currentUser: User = response.locals.currentUser;
+		const currentUser: UserClaim = response.locals.currentUser;
 
 		const groupsDal: GroupsDAL = response.locals.dals.groups;
 		groupsDal.getGroupById(new ObjectId(groupId)).pipe(
