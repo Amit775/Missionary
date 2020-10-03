@@ -3,14 +3,14 @@ import { injectable, inject } from 'inversify';
 import { ObjectId } from 'mongodb';
 
 import { API } from './api';
-import { TRequest, validation } from '../utils/validation';
+import { TRequest, validation } from '../application/middlewares/validation';
+import { gauthorization } from '../application/middlewares/auth';
 import { INJECTOR } from '../config/types';
 import { GroupsBL } from '../bl/groups';
-import { ActionFailedError, MissingArgumentError } from '../logger/error';
-import { BaseGroup, Group } from '../models/group';
 import { User } from '../models/user';
 import { Role } from '../models/permission';
-import { gauthorization } from '../logger/auth';
+import { BaseGroup, Group } from '../models/group';
+import { ActionFailedError, MissingArgumentError } from '../models/error';
 
 
 @injectable()

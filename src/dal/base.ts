@@ -10,8 +10,8 @@ import {
 } from 'mongodb';
 import { unmanaged, injectable } from 'inversify';
 import { Logger } from 'winston';
-
 import { IConfig } from '../config/injector';
+
 
 type FlattenIfArray<T> = T extends Array<infer R> ? R : T;
 

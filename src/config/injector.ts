@@ -13,7 +13,7 @@ import { UsersAPI } from '../api/users';
 import { GroupsAPI } from '../api/groups';
 import { MonitorAPI } from '../api/monitor';
 import { MissionsAPI } from '../api/missions';
-import { logger } from '../logger/logger';
+import { logger } from '../application/logger';
 import { default as config } from './config.json';
 import { INJECTOR } from './types';
 

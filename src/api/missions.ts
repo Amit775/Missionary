@@ -4,14 +4,14 @@ import { take } from 'rxjs/operators';
 import { ObjectId } from 'mongodb';
 
 import { API } from './api';
-import { Mission, BaseMission } from '../models/mission';
+import { TRequest, validation } from '../application/middlewares/validation';
+import { authentication, authorization } from '../application/middlewares/auth';
 import { INJECTOR } from '../config/types';
 import { MissionsBL } from '../bl/missions';
 import { User } from '../models/user';
-import { MissingArgumentError, InvalidArgumentError, NotFoundError, ActionFailedError } from '../logger/error';
 import { Permission } from '../models/permission';
-import { authentication, authorization } from '../logger/auth';
-import { TRequest, validation } from '../utils/validation';
+import { Mission, BaseMission } from '../models/mission';
+import { MissingArgumentError, InvalidArgumentError, NotFoundError, ActionFailedError } from '../models/error';
 
 
 interface UserId { userId: string };
@@ -215,7 +215,6 @@ export class MissionsAPI implements API {
 				});
 			}
 		);
-
 
 		this.router.put('/acceptJoinRequest/:id',
 			validation<UserIdWithPermission>(['userId', { name: 'permission', type: Permission }]),

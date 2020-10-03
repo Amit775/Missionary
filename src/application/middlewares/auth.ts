@@ -1,22 +1,21 @@
-import { NextFunction, request, Request, RequestHandler, Response } from 'express';
+import { NextFunction, Request, RequestHandler, Response } from 'express';
 import { ObjectId } from 'mongodb';
 import { verify } from 'jsonwebtoken';
 import { of, throwError } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { switchMap, take } from 'rxjs/operators';
 
-import { User } from '../models/user';
-import { publicKey } from '../config/keys';
-import { Permission, Role } from './../models/permission';
-import { MissionsDAL } from '../dal/missions';
-import { UserWithPermission, UserWithRole } from '../models/user';
-import { ForbiddenError, InvalidTokenError, MissingTokenError, NotFoundError } from './error';
-import { Mission } from '../models/mission';
-import { GroupsDAL } from '../dal/groups';
-import { Group } from '../models/group';
+import { User } from '../../models/user';
+import { publicKey } from '../../config/keys';
+import { Permission, Role } from '../../models/permission';
+import { MissionsDAL } from '../../dal/missions';
+import { UserWithPermission, UserWithRole } from '../../models/user';
+import { ForbiddenError, InvalidTokenError, MissingTokenError, NotFoundError } from '../../models/error';
+import { Mission } from '../../models/mission';
+import { GroupsDAL } from '../../dal/groups';
+import { Group } from '../../models/group';
 
 
 export function authentication(): RequestHandler {
-
 	return (request: Request, response: Response, next: NextFunction) => {
 		const token: string = request.cookies.token;
 		if (!token) return next(new MissingTokenError());
@@ -45,6 +44,7 @@ export function authorization(desiredPermission: Permission): RequestHandler {
 
 		const missionsDAL: MissionsDAL = response.locals.dals.missions;
 		missionsDAL.getMissionById(new ObjectId(missionId)).pipe(
+			take(1),
 			switchMap((mission: Mission) => {
 				if (!mission) return throwError(new NotFoundError(`mission with id: ${missionId}`))
 
@@ -55,7 +55,9 @@ export function authorization(desiredPermission: Permission): RequestHandler {
 			})
 		).subscribe({
 			next: (permission: Permission) => {
-				if (permission < desiredPermission) return next(new ForbiddenError(getMethodName(request), Permission[permission], Permission[desiredPermission]));
+				if (permission < desiredPermission)
+					return next(new ForbiddenError(getMethodName(request), Permission[permission], Permission[desiredPermission]));
+
 				return next();
 			},
 			error: (error: any) => next(error)
@@ -70,6 +72,7 @@ export function gauthorization(desiredRole: Role): RequestHandler {
 
 		const groupsDal: GroupsDAL = response.locals.dals.groups;
 		groupsDal.getGroupById(new ObjectId(groupId)).pipe(
+			take(1),
 			switchMap((group: Group) => {
 				if (!group) return throwError(new NotFoundError(`group with id: ${group}`))
 
@@ -80,7 +83,9 @@ export function gauthorization(desiredRole: Role): RequestHandler {
 			})
 		).subscribe({
 			next: (role: Role) => {
-				if (role < desiredRole) return next(new ForbiddenError(getMethodName(request) ,Role[role], Role[desiredRole]));
+				if (role < desiredRole)
+					return next(new ForbiddenError(getMethodName(request), Role[role], Role[desiredRole]));
+
 				return next();
 			},
 			error: (error: any) => next(error)
@@ -88,6 +93,6 @@ export function gauthorization(desiredRole: Role): RequestHandler {
 	}
 }
 
-function getMethodName(request: Request): string{
+function getMethodName(request: Request): string {
 	return request.route.path.split('/')[1];
 }

@@ -1,5 +1,3 @@
-import { Permission, Role } from '../models/permission';
-
 export class MSError extends Error {
 	readonly type: 'MSError' = 'MSError';
 
@@ -19,7 +17,6 @@ export class NotFoundError extends MSError {
 		);
 	}
 }
-
 
 export class MissingArgumentError extends MSError {
 	constructor(public argumentName: string) {

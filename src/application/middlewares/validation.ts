@@ -1,5 +1,6 @@
 import { NextFunction, Request, RequestHandler, Response } from 'express';
-import { MissingArgumentError, InvalidArgumentError } from '../logger/error';
+
+import { MissingArgumentError, InvalidArgumentError } from '../../models/error';
 
 type Name<T> = Extract<keyof T, string>;
 

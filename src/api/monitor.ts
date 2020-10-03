@@ -1,10 +1,10 @@
 import { default as express, Router, Request, Response, NextFunction } from 'express';
 import { injectable } from 'inversify';
 import { sign } from 'jsonwebtoken';
-import { User } from '../models/user';
 
 import { API } from './api';
 import { privateKey } from '../config/keys';
+import { User } from '../models/user';
 
 
 const test = () => true;
