@@ -16,6 +16,7 @@ import { MissionsAPI } from '../api/missions';
 import { logger } from '../application/logger';
 import { default as config } from './config.json';
 import { INJECTOR } from './types';
+import { TreeNodesDAL } from 'src/dal/tree-nodes';
 
 
 export type IConfig = typeof config;
@@ -34,6 +35,8 @@ Injector.bind<API>(INJECTOR.APIS).to(GroupsAPI).inSingletonScope();
 Injector.bind<MissionsBL>(INJECTOR.MissionsBL).to(MissionsBL).inSingletonScope();
 Injector.bind<MissionsDAL>(INJECTOR.MissionsDAL).to(MissionsDAL).inSingletonScope();
 Injector.bind<API>(INJECTOR.APIS).to(MissionsAPI).inSingletonScope();
+
+Injector.bind<TreeNodesDAL>(INJECTOR.TreeNodesDAL).to(TreeNodesDAL).inSingletonScope();
 
 Injector.bind<API>(INJECTOR.APIS).to(MonitorAPI).inSingletonScope();
 

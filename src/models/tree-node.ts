@@ -1,6 +1,6 @@
 import { ObjectId } from 'mongodb';
 
-export class Node {
+export class TreeNode {
 	_id: ObjectId;
 	name: string;
 	hierarchy: string[];

@@ -12,6 +12,8 @@ import { ForbiddenError, InvalidTokenError, MissingTokenError, NotFoundError } f
 import { Mission } from '../../models/mission';
 import { GroupsDAL } from '../../dal/groups';
 import { Group } from '../../models/group';
+import { TreeNodesDAL } from 'src/dal/tree-nodes';
+import { TreeNode } from 'src/models/tree-node';
 
 
 export function authentication(): RequestHandler {

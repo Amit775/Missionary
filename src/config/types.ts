@@ -6,6 +6,7 @@ export const INJECTOR: { [key: string]: symbol } = {
 	GroupsDAL: Symbol('IGroupsDAL'),
 	MissionsBL: Symbol('IMissionsBL'),
 	MissionsDAL: Symbol('IMissionsDAL'),
+	TreeNodesDAL: Symbol('ITreeNodeDAL'),
 	APIS: Symbol('API'),
 	Logger: Symbol('Logger'),
 	Config: Symbol('IConfig'),
